@@ -29,6 +29,7 @@ class Buchi(object):
         self.atomic_prop = workspace.atomic_prop
         self.sat_init_edge = []
         self.sat_vertex = False
+        self.regions = workspace.regions
         # graph of buchi automaton
         self.buchi_graph = DiGraph(type='buchi', init=[], accept=[])
 
@@ -373,9 +374,6 @@ class Buchi(object):
                         continue
                     # --------- Violation of team size ---------
                     # check feasibility, whether required robots of same type for one literal exceeds provided robots
-                    # for i in range(len(literals)):
-                    #     if self.type_num[literals[i][1]] < literals[i][2]:
-                    #         raise RuntimeError('{0} required robots exceeds provided robots'.format(literals[i]))
                     is_total_number_larger_than_expected = False
                     # required totoal robots exceeds provided robots
                     for type_of_robot in self.type_num.keys():
@@ -384,6 +382,14 @@ class Buchi(object):
                             is_total_number_larger_than_expected = True
                             break
                     if is_total_number_larger_than_expected:
+                        continue
+                    # requred robots larger than area of region
+                    is_total_robots_larger_than_regions = False
+                    for region, area in self.regions.items():
+                        if sum([l[2] for l in literals if l[0] == region]) > len(area):
+                            is_total_robots_larger_than_regions = True
+                            break
+                    if is_total_robots_larger_than_regions:
                         continue
 
                 if literals:
