@@ -59,6 +59,8 @@ def ltl_mrta(formula):
         if is_nonempty_self_loop:
             next_vertices = [(0, 0)]
 
+        print_red_on_cyan('================ prefix part ================')
+
         # loop over all next vertices
         for next_vertex, _ in next_vertices:
             # ----------------- infer the poset -----------------------
@@ -116,6 +118,8 @@ def ltl_mrta(formula):
                                                                      larger_element,
                                                                      robot2eccl, init_state, buchi,
                                                                      is_nonempty_self_loop)
+                if not robot_waypoint_pre:
+                    continue
 
                 end = datetime.now()
 
@@ -156,9 +160,13 @@ def ltl_mrta(formula):
                 if is_nonempty_self_loop:
                     print_red_on_cyan(task.formula)
                     print_red_on_cyan('A path is found for the case where the accepting state has a self-loop')
+                    vis(workspace, robot_path_pre, {robot: [len(path)] * 2 for robot, path in robot_path_pre.items()},
+                        [])
+
                     return
 
-                # ======================================= prefix part ==================================================
+                # ======================================= suffix part ==================================================
+                print_red_on_cyan('================ suffix part ================')
                 if not is_nonempty_self_loop:
                     # ----------------- update after the prefix -----------------
                     workspace.type_robot_location = {robot: path[-1] for robot, path in robot_path_pre.items()}
@@ -201,7 +209,7 @@ def ltl_mrta(formula):
 
                         # --------------------- MILP -------------------------
                         init_state = next_vertex
-                        robot_waypoint_suf, robot_time_suf, id2robots, robot_label_suf, robot_waypoint_axis, robot_time_axis, \
+                        robot_waypoint_suf, robot_time_suf, _, robot_label_suf, robot_waypoint_axis, robot_time_axis, \
                         time_axis, acpt_run = milp_suf.construct_milp_constraint(ts, workspace.type_num, pos,
                                                                                  pruned_subgraph,
                                                                                  element2edge,
@@ -211,6 +219,8 @@ def ltl_mrta(formula):
                                                                                  larger_element, robot2eccl, id2robots,
                                                                                  init_state, buchi,
                                                                                  is_nonempty_self_loop)
+                        if not robot_waypoint_suf:
+                            continue
 
                         for robot, time in list(robot_time_suf.items()):
                             # delete such robots that did not participate (the initial location of robots may just satisfies)
@@ -254,7 +264,10 @@ def ltl_mrta(formula):
 
                         print_red_on_cyan(task.formula)
                         print_red_on_cyan('A path is found for the case where the accepting state does not have a self-loop')
+                        vis(workspace, robot_path, {robot: [len(path)] * 2 for robot, path in robot_path.items()}, [])
+
                         return
 
-# if __name__ == '__main__':
-#     ltl_mrta(None)
+
+if __name__ == '__main__':
+    ltl_mrta(None)

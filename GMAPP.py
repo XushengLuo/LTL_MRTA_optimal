@@ -248,7 +248,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, is_nonempty_sel
                 horizon = clock[2] - acpt_run[index-1][2]
             else:
                 horizon = clock[2]
-            for T in range(horizon+2, horizon + 100, 1):
+            for T in range(horizon, horizon + 100, 1):
                 paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, acpt_run[clock][3],
                                                   acpt_run[clock][4])
                 if paths:
@@ -343,7 +343,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, is_nonempty_sel
             # expected horizon according to high-level plan
             horizon = next_time - past_time
             robot_init = {robot: path[-1] for robot, path in robot_path.items()}
-            for T in range(horizon+5, horizon + 100, 5):
+            for T in range(horizon, horizon + 100, 1):
                 mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
                                                        robot_init, is_single_subtask)
                 if mapp_paths:

@@ -1,6 +1,10 @@
 from gurobipy import *
 import math
 from post_processing import run
+from termcolor import colored, cprint
+
+
+print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
 
 def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge, element_component_clause_literal_node,
@@ -83,17 +87,15 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
     if m.status == GRB.Status.OPTIMAL:
         print('Optimal objective: %g' % m.objVal)
     elif m.status == GRB.Status.INF_OR_UNBD:
-        print('Model is infeasible or unbounded')
-        exit(0)
+        print_red_on_cyan('Model is infeasible or unbounded')
     elif m.status == GRB.Status.INFEASIBLE:
         print('Model is infeasible')
-        exit(0)
     elif m.status == GRB.Status.UNBOUNDED:
         print('Model is unbounded')
-        exit(0)
     else:
         print('Optimization ended with status %d' % m.status)
-        exit(0)
+    if m.status != GRB.Status.OPTIMAL:
+        return None, None, None, None, None, None, None, None
 
     goal = 0
     for index in x_vars.keys():
