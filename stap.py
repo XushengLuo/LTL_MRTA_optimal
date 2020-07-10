@@ -83,10 +83,10 @@ print('partial time before milp: {0}'.format((datetime.now() - start).total_seco
 
 # --------------------- MILP -------------------------
 robot_waypoint_pre, robot_time_pre, id2robots, robot_label_pre, robot_waypoint_axis, robot_time_axis, \
-time_axis, acpt_run = milp.construct_milp_constraint(ts, workspace.type_num, pos, pruned_subgraph, element2edge,
+time_axis, acpt_run, exe_robot_next_vertex = milp.construct_milp_constraint(ts, workspace.type_num, pos, pruned_subgraph, element2edge,
                                                      element_component_clause_literal_node, poset_relation,
                                                      init_type_robot_node, incomparable_element, larger_element,
-                                                     robot2eccl, factor, init_state, buchi, is_nonempty_self_loop)
+                                                     robot2eccl, init_state, buchi, is_nonempty_self_loop)
 
 end = datetime.now()
 
@@ -162,7 +162,7 @@ if not is_nonempty_self_loop:
                                               init_type_robot_node, incomparable_element, larger_element)
 
     ts = weighted_ts.construct_graph(num_nodes, node_location_type_component_element, edge_set,
-                                     workspace.p2p, factor)
+                                     workspace.p2p)
 
     # --------------------- MILP -------------------------
     init_state = next_vertex

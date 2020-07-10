@@ -22,7 +22,7 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
         node, clock, acpt_run_ = frontier.pop()
 
         # Determine the set of identical time instants
-        instant_element = time_axis[clock+1]
+        instant_element = time_axis[clock + 1]
         if acpt_run_:
             pre_essential_clause_edge = acpt_run_[-1]['essential_clause_edge']
         else:
@@ -38,9 +38,9 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
                 continue
             # equivalent subtask
             if graph.edges[element2edge[instant_element[1]]]['formula'] == graph.edges[(node, succ)]['formula'] and \
-                    graph.nodes[element2edge[instant_element[1]][0]]['formula'] == graph.nodes[node]['formula']:
-            # if isEquivalent(graph.edges[element2edge[instant_element[1]]]['formula'], graph.edges[(node, succ)]['formula']) and \
-            #         isEquivalent(graph.nodes[element2edge[instant_element[1]][0]]['formula'], graph.nodes[node]['formula']):
+                            graph.nodes[element2edge[instant_element[1]][0]]['formula'] == graph.nodes[node]['formula']:
+                # if isEquivalent(graph.edges[element2edge[instant_element[1]]]['formula'], graph.edges[(node, succ)]['formula']) and \
+                #         isEquivalent(graph.nodes[element2edge[instant_element[1]][0]]['formula'], graph.nodes[node]['formula']):
 
                 # print((node, succ), graph.edges[(node, succ)]['formula'])
                 # whether the collection of paths at clock satisfies the edge label
@@ -48,7 +48,7 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
                 # exe_robot: set of robots that takes the subtask with nonzero id
 
                 essential_clause_edge, neg_clause_edge, exe_robots_edge \
-                    = determine_essentials(instant_element, var,  graph.edges[(node, succ)]['label'],
+                    = determine_essentials(instant_element, var, graph.edges[(node, succ)]['label'],
                                            graph.edges[(node, succ)]['neg_label'], 1,
                                            element_component_clause_literal_node, ts, type_num)
 
@@ -60,18 +60,24 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
 
                 # clock, the exact time when transition occurs
                 acpt_run = acpt_run_.copy()  # copy the history
-                acpt_run.append({'subtask': (node, succ), 'time_element': time_axis[clock+1],
+                acpt_run.append({'subtask': (node, succ), 'time_element': time_axis[clock + 1],
                                  'essential_robot_edge': exe_robots_edge,
                                  'essential_clause_edge': essential_clause_edge, 'neg_edge': neg_clause_edge,
                                  'essential_robot_vertex': exe_robots_vertex,
                                  'neg_vertex': neg_clause_vertex})
-                # if (succ == accept and 'artificial' not in graph.succ[succ]) or 'artificial' in succ:
-                #     return acpt_run
+
+                # find the set of robots that satisfy the vertex label of the next vertex
+                # which will be used to close the loop
+                if not is_nonempty_self_loop and 'artificial' in node:
+                    exe_robots_vertex = determine_robots_for_next(instant_element, var, graph.nodes[node]['label'],
+                                                                  element_component_clause_literal_node, ts,
+                                                                  type_num)
+
                 # 1: self-loop exists, stop when artificial is reached
                 # 2: self-loop does not exist, stop when next_artificial is reached
                 if (is_nonempty_self_loop and 'artificial' in succ) or \
                         (not is_nonempty_self_loop and 'next_artificial' in succ):
-                    return acpt_run
+                    return acpt_run, exe_robots_vertex
                 # clock + 1, after reaching succ, the immediate time clock that should be verified
                 frontier.append([succ, clock + 1, acpt_run])
 
@@ -130,3 +136,33 @@ def not_exclusion(pre_complete_clause_formula, neg_clause):
                     return False
         return True
 
+
+def determine_robots_for_next(instant_element, var, label, element_component_clause_literal_node,
+                              ts, type_num):
+    """
+    determine the essential robots for the vertex label of the next vertex, i.e., artificial robot
+    """
+    if label == '1':
+        return '1'
+    else:
+        if label:
+            essential_clause = []
+            # iterate over all elements with identical completion times
+            for c, clause in enumerate(label):
+                # determine the clause valued 1
+                if var['c'][(instant_element[1], 0, c)].x == 1:
+                    essential_clause = clause
+                    break
+
+            exe_robots = {tuple(lit): [] for lit in essential_clause}
+            for l, lit in enumerate(essential_clause):
+                for i in element_component_clause_literal_node[(instant_element[1], 0, c, l)]:
+                    for k in range(type_num[ts.nodes[i]['location_type_component_element'][1]]):
+                        if sum([round(var['x'][(p, i, k)].x) for p in ts.predecessors(i)]) == 1:
+                            exe_robots[tuple(lit)].append((lit[1], k))
+                            break
+        # empty label
+        else:
+            return '1'
+
+    return exe_robots

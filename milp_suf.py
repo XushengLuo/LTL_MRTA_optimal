@@ -3,14 +3,12 @@ import math
 from post_processing import run
 from termcolor import colored, cprint
 
-
 print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
 
 def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge, element_component_clause_literal_node,
                               poset_relation, init_type_robot_node, incomparable_element, larger_element,
                               robot2eccl, id2robots, init_state, buchi, is_nonempty_self_loop):
-
     M = 1e5
     epsilon = 1  # edge and previous edge
     m = Model()
@@ -109,16 +107,16 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
     # obtain the time axis
     time_axis = get_axis(t_edge_vars)
 
-    robot_waypoint_pre, robot_time_pre, robot_label_pre, robot_waypoint_axis, robot_time_axis\
+    robot_waypoint_pre, robot_time_pre, robot_label_pre, robot_waypoint_axis, robot_time_axis \
         = get_waypoint(x_vars, t_vars, ts, init_type_robot_node, time_axis)
 
     # extract the run
-    acpt_run = run(pruned_subgraph, time_axis, init_state, element2edge,
-                   {'x': x_vars, 'c': c_vars, 't': t_edge_vars},
-                   element_component_clause_literal_node, ts, type_num, is_nonempty_self_loop)
+    acpt_run, exe_robot_next_vertex = run(pruned_subgraph, time_axis, init_state, element2edge,
+                                          {'x': x_vars, 'c': c_vars, 't': t_edge_vars},
+                                          element_component_clause_literal_node, ts, type_num, is_nonempty_self_loop)
 
     return robot_waypoint_pre, robot_time_pre, id2robots, robot_label_pre, robot_waypoint_axis, robot_time_axis, \
-           time_axis, acpt_run
+           time_axis, acpt_run, exe_robot_next_vertex
 
 
 def create_variables(m, ts, poset, pruned_subgraph, element2edge, type_num):
@@ -139,12 +137,14 @@ def create_variables(m, ts, poset, pruned_subgraph, element2edge, type_num):
     for node in ts.nodes():
         # vars for self loop
         if ts.nodes[node]['location_type_component_element'][2] == 0:
-            t_vars.update(m.addVars([node], list(range(type_num[ts.nodes[node]['location_type_component_element'][1]])), [0, 1],
-                                    vtype=GRB.INTEGER))
+            t_vars.update(
+                m.addVars([node], list(range(type_num[ts.nodes[node]['location_type_component_element'][1]])), [0, 1],
+                          vtype=GRB.INTEGER))
         # vars for edge
         else:
-            t_vars.update(m.addVars([node], list(range(type_num[ts.nodes[node]['location_type_component_element'][1]])), [1],
-                                    vtype=GRB.INTEGER))
+            t_vars.update(
+                m.addVars([node], list(range(type_num[ts.nodes[node]['location_type_component_element'][1]])), [1],
+                          vtype=GRB.INTEGER))
     m.update()
 
     # routing variable (node_i, node_j, robot_index)
@@ -204,10 +204,11 @@ def one_clause_true(m, c_vars, element, component, label, poset_relation, incomp
 
 def literal_clause(m, x_vars, c_vars, element, component, label, ts, type_num, clause_nodes, c):
     # encode the relation between clause and its literals -- eq (10)
-    expr_literal = quicksum(x_vars[(p, i, k)] for literal_nodes in clause_nodes for i in literal_nodes for p in ts.predecessors(i)
-                            for k in range(type_num[ts.nodes[i]['location_type_component_element'][1]]))
+    expr_literal = quicksum(
+        x_vars[(p, i, k)] for literal_nodes in clause_nodes for i in literal_nodes for p in ts.predecessors(i)
+        for k in range(type_num[ts.nodes[i]['location_type_component_element'][1]]))
     mult = sum([l[2] for l in label[c]])
-    m.addConstr(expr_literal/mult == c_vars[(element, component, c)])
+    m.addConstr(expr_literal / mult == c_vars[(element, component, c)])
     m.update()
 
 
@@ -303,7 +304,8 @@ def edge_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars,
                                 <= t_edge_vars[element])
 
                     m.addConstr(t_edge_vars[element] <= quicksum(t_vars[(i, k, 1)]
-                                    for k in range(type_num[ts.nodes[i]['location_type_component_element'][1]]))
+                                                                 for k in range(
+                        type_num[ts.nodes[i]['location_type_component_element'][1]]))
                                 + 1 + M * (1 - c_vars[(element, 0, c_self_loop)]))
     # the vertex label is false, or the initial robot locations satisfy the not true vertex label of initial vertex,
     # the edge label becomes true at 0, following after (16)
@@ -322,7 +324,8 @@ def edge_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars,
             m.addConstr(t_edge_vars[e] + 1 + M * (quicksum(b_element_vars[(e, o)] for o in strict_incmp if o != e) - z)
                         <= t_edge_vars[element])
             m.addConstr(t_edge_vars[element] <= t_edge_vars[e] + 1 + M * (z - quicksum(b_element_vars[(e, o)]
-                                                                                       for o in strict_incmp if o != e)))
+                                                                                       for o in strict_incmp if
+                                                                                       o != e)))
 
     m.update()
 
@@ -346,15 +349,16 @@ def self_loop_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_
         # no matter what the edge label of the previous subtask is
         # covered by + incomparable
         strict_incmp = [order[0] for order in poset_relation if order[1] == element] + incomparable_element[element]
-        z = len(strict_incmp)-1
+        z = len(strict_incmp) - 1
         if z != -1:
             for l in clause_nodes:
                 for j in l:
                     for e in strict_incmp:
-                        m.addConstr(quicksum(t_vars[(j, k, 0)]for k in range(type_num[ts.nodes[j]
+                        m.addConstr(quicksum(t_vars[(j, k, 0)] for k in range(type_num[ts.nodes[j]
                         ['location_type_component_element'][1]])) <=
                                     t_edge_vars[e] + 1 + M * (z -
-                                                              quicksum(b_element_vars[(e, o)] for o in strict_incmp if o != e)))
+                                                              quicksum(b_element_vars[(e, o)] for o in strict_incmp if
+                                                                       o != e)))
         # there is no prior subtasks, and the initial robot locations satisfy the vertex label, which is not true
         # then the vertex label is activated at 0 ----- eq (19)
         elif z == -1 and buchi.sat_vertex:
