@@ -219,16 +219,10 @@ class Buchi(object):
             # remove other accepting vertices
             acpt_graph.remove_nodes_from([node for node in self.buchi_graph.graph['accept'] if node != accept])
             # remove initial vertices without selfloop
-            # acpt_graph.remove_nodes_from([node for node in self.buchi_graph.graph['init']
-            #                               if node in acpt_graph.nodes and not acpt_graph.nodes[node]['label']
-            #                               and node != accept])
-            acpt_graph.remove_nodes_from([node for node in self.buchi_graph.graph['init'] if node != accept])
-            # remove_edge = []
-            # remove edges from accepting vertices whose edge label is not true
-            # for suc in acpt_graph.succ[accept]:
-            #     if acpt_graph.edges[(accept, suc)]['label'] != '1':
-            #         remove_edge.append((accept, suc))
-            # acpt_graph.remove_edges_from(remove_edge)
+            acpt_graph.remove_nodes_from([node for node in self.buchi_graph.graph['init']
+                                          if node in acpt_graph.nodes and not acpt_graph.nodes[node]['label']
+                                          and node != accept])
+            # acpt_graph.remove_nodes_from([node for node in self.buchi_graph.graph['init'] if node != accept])
 
             # find the shortest path back to itself
             length = np.inf
@@ -243,61 +237,24 @@ class Buchi(object):
             accept_accept[accept] = length
 
         # select initial to accept
-        init_state = None
-        accept_state = None
-        total_length = np.inf
-        for pair, length in init_accept.items():
-            if total_length > length + accept_accept[pair[1]]:
-                total_length = length + accept_accept[pair[1]]
-                init_state, accept_state = pair[0], pair[1]
+        init_acpt = {pair: length + accept_accept[pair[1]] for pair, length in init_accept.items()
+                     if length != np.inf and accept_accept[pair[1]] != np.inf}
+        return sorted(init_acpt.items(), key=lambda x: x[1])
 
-        # self loop around the accepting state
-        self_loop_label = self.buchi_graph.nodes[accept_state]['label']
-        self_loop = self_loop_label == '1' or self_loop_label != []
-        # # find the next vertex after the accepting vertex
-        # # if self-loop does not exist, find the next vertex in the shortest simple cycle
-        # # which will be used to activate the suffix part
-        # next_vertex = None
-        # if not self_loop:
-        #     acpt_graph = self.buchi_graph.copy()
-        #     # remove other accepting vertices
-        #     acpt_graph.remove_nodes_from([node for node in self.buchi_graph.graph['accept'] if node != accept])
-        #     # remove initial vertices without selfloop
-        #     acpt_graph.remove_nodes_from([node for node in self.buchi_graph.graph['init']
-        #                                   if node in acpt_graph.nodes and not acpt_graph.nodes[node]['label']
-        #                                   and node != accept])
-        #     remove_edge = []
-        #     # remove edges from accepting vertices whose edge label is not true
-        #     for suc in acpt_graph.succ[accept]:
-        #         if acpt_graph.edges[(accept, suc)]['label'] != '1':
-        #             remove_edge.append((accept, suc))
-        #     acpt_graph.remove_edges_from(remove_edge)
-        #
-        #     # find the shortest path back to itself
-        #     length = np.inf
-        #     for suc in acpt_graph.succ[accept]:
-        #         try:
-        #             len1, path = nx.algorithms.single_source_dijkstra(self.buchi_graph,
-        #                                                               source=suc, target=accept)
-        #         except nx.exception.NetworkXNoPath:
-        #             len1, path = np.inf, []
-        #         if len1 + 1 < length and path:
-        #             length = len1 + 1
-        #             next_vertex = suc
-        next_vertex = None
-        formula_length = np.inf
+    def get_next_vertex(self, accept_state):
+        """
+        get the next vertex after the selected accepting state
+        """
+        next_vertex = {}
         for suc in self.buchi_graph.succ[accept_state]:
             formula = self.buchi_graph.edges[(accept_state, suc)]['formula']
             if formula == to_dnf('1'):
-                next_vertex = suc
-                break
+                next_vertex[suc] = 0
             else:
                 length = len([letter for clause in formula.__str__().split('|') for letter in clause.split('&')])
-                if length < formula_length:
-                    next_vertex = suc
-                    formula_length = length
+                next_vertex[suc] = length
 
-        return init_state, accept_state, self_loop, next_vertex
+        return sorted(next_vertex.items(), key=lambda x: x[1])
 
     def merge_check_feasible(self, symbol):
         """
@@ -461,7 +418,14 @@ class Buchi(object):
         self.sat_init_edge = []
         subgraph = self.buchi_graph.copy()
         # remove all other initial vertices
-        subgraph.remove_nodes_from([node for node in self.buchi_graph.graph['init'] if node != init])
+        if 'init' in init:
+            subgraph.remove_nodes_from([node for node in self.buchi_graph.graph['init'] if node != init])
+        # remove initial vertices without selfloop
+        elif init == next_vertex:
+            subgraph.remove_nodes_from([node for node in self.buchi_graph.graph['init']
+                                        if node in subgraph.nodes and not subgraph.nodes[node]['label']
+                                        and node != accept])
+
         remove_edge = []
         # no self-loop, initial node: keep the edge that robot initial locations satisfy
         if not subgraph.nodes[init]['label']:
@@ -624,7 +588,7 @@ class Buchi(object):
                     label2eccl[region_type] = [(element, component, c, l)]
         return label2eccl
 
-    def map_path_to_element_sequence(self, edge2element, element2edge, pruned_subgraph, paths):
+    def map_path_to_element_sequence(self, edge2element, paths):
         """
 
         """
@@ -646,12 +610,9 @@ class Buchi(object):
             if not is_added:
                 element_sequences.append([element_sequence])
 
-        # for each set of sequences of integers, find one poset and determined the poset with maximum width
-        graph_with_maximum_width = DiGraph()
-        width = 0
-        height = -np.inf
-
-        for ele_seq in element_sequences:
+        # for each set of sequences of integers, find one poset
+        hasse_graphs = {}
+        for index, ele_seq in enumerate(element_sequences):
             # all pairs of ordered elements from the sequence of elements
             linear_order = []
             for i in range(len(ele_seq[0])):
@@ -674,13 +635,9 @@ class Buchi(object):
                 print(hasse.edges)
             h = nx.dag_longest_path_length(hasse)
             # h = len([e for e in hasse.nodes if pruned_subgraph.nodes[element2edge[e][0]]['label'] != '1'])
-            if w > width or (w == width and h > height):
-                graph_with_maximum_width = hasse
-                width = w
-                height = h
-        # print(height)
-        return {edge for edge in graph_with_maximum_width.edges()}, list(graph_with_maximum_width.nodes), \
-               graph_with_maximum_width
+            hasse_graphs[index] = [(w, h), {edge for edge in hasse.edges()}, list(hasse.nodes), hasse]
+
+        return sorted(hasse_graphs.values(), key=lambda x: (x[0][0], x[0][1]), reverse=True)
 
     def prune_subgraph_automaton(self, subgraph):
         """

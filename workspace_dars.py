@@ -21,10 +21,10 @@ class Workspace(object):
         # self.length = int(sys.argv[1])
         # self.width = int(sys.argv[1])
         # n = int(sys.argv[2])
-        self.length = 30    # length
-        self.width = 30    # width
-        n = 12
-        self.type_num = {1: n}   # single-task robot
+        self.length = 10    # length
+        self.width = 10    # width
+        n = 4
+        self.type_num = {1: n, 2: n}   # single-task robot
         self.workspace = (self.length, self.width)
         self.num_of_regions = 10
         self.num_of_obstacles = 10
@@ -97,21 +97,21 @@ class Workspace(object):
         key_init = list(self.label_location.keys())
 
         p2p = dict()
-        # for l1 in range(len(self.regions)):
-        #     for l2 in range(l1, len(self.regions)):
-        #         min_length = np.inf
-        #         for source in self.regions[key_region[l1]]:
-        #             for target in self.regions[key_region[l2]]:
-        #                 length, _ = nx.algorithms.single_source_dijkstra(self.graph_workspace, source=source,
-        #                                                                  target=target)
-        #                 if length < min_length:
-        #                     min_length = length
-        #         p2p[(key_region[l1], key_region[l2])] = min_length
-        #         p2p[(key_region[l2], key_region[l1])] = min_length
+        for l1 in range(len(self.regions)):
+            for l2 in range(l1, len(self.regions)):
+                min_length = np.inf
+                for source in self.regions[key_region[l1]]:
+                    for target in self.regions[key_region[l2]]:
+                        length, _ = nx.algorithms.single_source_dijkstra(self.graph_workspace, source=source,
+                                                                         target=target)
+                        if length < min_length:
+                            min_length = length
+                p2p[(key_region[l1], key_region[l2])] = min_length
+                p2p[(key_region[l2], key_region[l1])] = min_length
         # with open('data/p2p_large_workspace', 'wb') as filehandle:
         #     pickle.dump(p2p, filehandle)
-        with open('data/p2p_large_workspace', 'rb') as filehandle:
-            p2p = pickle.load(filehandle)
+        # with open('data/p2p_large_workspace', 'rb') as filehandle:
+        #     p2p = pickle.load(filehandle)
         for r1 in range(len(self.label_location)):
             for l1 in range(len(self.regions)):
                 min_length = np.inf
@@ -183,13 +183,13 @@ class Workspace(object):
     def allocate_region_dars(self):
         # (x, y) --> (y-1, 30-x)
         # dars
-        regions = []
-        regions.append(list(itertools.product(range(0, 6), range(0, 17))))  # x0 l1
-        regions.append(list(itertools.product(range(0, 11), range(19, 30))))  # b1 l2
-        regions.append(list(itertools.product(range(18, 30), range(16, 30))))  # b2 l3
-        regions.append(list(itertools.product(range(18, 30), range(0, 14))))  # b3 l4
-        regions.append(list(itertools.product(range(16, 18), range(0, 3))))  # g1 l5
-        regions.append(list(itertools.product(range(18, 21), range(14, 16))))  # g1 l6
+        # regions = []
+        # regions.append(list(itertools.product(range(0, 6), range(0, 17))))  # x0 l1
+        # regions.append(list(itertools.product(range(0, 11), range(19, 30))))  # b1 l2
+        # regions.append(list(itertools.product(range(18, 30), range(16, 30))))  # b2 l3
+        # regions.append(list(itertools.product(range(18, 30), range(0, 14))))  # b3 l4
+        # regions.append(list(itertools.product(range(16, 18), range(0, 3))))  # g1 l5
+        # regions.append(list(itertools.product(range(18, 21), range(14, 16))))  # g1 l6
 
         # small regions
         # regions = []
@@ -199,32 +199,32 @@ class Workspace(object):
         # regions.append(list(itertools.product(range(25, 30), range(0, 5))))  # b3
 
         # # small workspace
-        # regions = []
-        # regions.append(list(itertools.product(range(0, 2), range(0, 5))))  # x0 l1
-        # regions.append(list(itertools.product(range(0, 3), range(8, 10))))  # b1 l2
-        # regions.append(list(itertools.product(range(8, 10), range(7, 10))))  # b2 l3
-        # regions.append(list(itertools.product(range(8, 10), range(0, 2))))  # b3 l4
-        # regions.append(list(itertools.product(range(5, 6), range(0, 2))))  # g1 l5
-        # regions.append(list(itertools.product(range(6, 8), range(4, 5))))  # g2 l6
+        regions = []
+        regions.append(list(itertools.product(range(0, 2), range(0, 5))))  # x0 l1
+        regions.append(list(itertools.product(range(0, 3), range(8, 10))))  # b1 l2
+        regions.append(list(itertools.product(range(8, 10), range(7, 10))))  # b2 l3
+        regions.append(list(itertools.product(range(8, 10), range(0, 2))))  # b3 l4
+        regions.append(list(itertools.product(range(5, 6), range(0, 2))))  # g1 l5
+        regions.append(list(itertools.product(range(6, 8), range(4, 5))))  # g2 l6
 
         return regions
 
     def allocate_obstacle_dars(self):
         # 30 by 30
-        obstacles = []
-        obstacles.append(list(itertools.product(range(0, 8), range(17, 19))))  # o1
-        obstacles.append(list(itertools.product(range(6, 8), range(0, 12))))
-        obstacles.append(list(itertools.product(range(11, 13), range(18, 30))))  # o2
-        obstacles.append(list(itertools.product(range(16, 18), range(3, 27))))  # o3
-        obstacles.append(list(itertools.product(range(21, 30), range(14, 16))))  # o4
+        # obstacles = []
+        # obstacles.append(list(itertools.product(range(0, 8), range(17, 19))))  # o1
+        # obstacles.append(list(itertools.product(range(6, 8), range(0, 12))))
+        # obstacles.append(list(itertools.product(range(11, 13), range(18, 30))))  # o2
+        # obstacles.append(list(itertools.product(range(16, 18), range(3, 27))))  # o3
+        # obstacles.append(list(itertools.product(range(21, 30), range(14, 16))))  # o4
 
         # small workspace
-        # obstacles = []
-        # obstacles.append(list(itertools.product(range(0, 2), range(5, 6))))  # o1
-        # # obstacles.append(list(itertools.product(range(2, 2), range(0, 4))))  #
-        # obstacles.append(list(itertools.product(range(3, 4), range(7, 10))))  # o2
-        # obstacles.append(list(itertools.product(range(5, 6), range(2, 8))))  # o3
-        # obstacles.append(list(itertools.product(range(8, 10), range(4, 5))))  # o4
+        obstacles = []
+        obstacles.append(list(itertools.product(range(0, 2), range(5, 6))))  # o1
+        # obstacles.append(list(itertools.product(range(2, 2), range(0, 4))))  #
+        obstacles.append(list(itertools.product(range(3, 4), range(7, 10))))  # o2
+        obstacles.append(list(itertools.product(range(5, 6), range(2, 8))))  # o3
+        obstacles.append(list(itertools.product(range(8, 10), range(4, 5))))  # o4
 
         return obstacles
 

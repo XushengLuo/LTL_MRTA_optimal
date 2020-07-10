@@ -326,7 +326,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, is_nonempty_sel
             next_time = acpt_run[clock+1]['time_element'][0]  # the completion of the current subtask
 
             # robots that need to move according to positive literals
-            partial_or_full = 'p'
+            partial_or_full = 'f'
             robot_move = set(robot for robot_initial_target in robot_team_initial_target.values()
                              for robot in robot_initial_target.keys())
             remove_edge = update_robot_env(workspace, robot_team_initial_target, robot_move, robot_waypoint, robot_time,

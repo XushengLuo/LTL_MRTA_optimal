@@ -2,7 +2,7 @@ import sys
 
 
 class Task(object):
-    def __init__(self):
+    def __init__(self, formula=None):
         # l_0_0_0: regions, type, #robots, indicator for same robots
         # self.formula = '<> l1_1_1_0 && <> l3_1_1_0' #  && <> l4_4_2_0 && <> l5_2_4_0 && <> l6_3_3_0 && <> l7_4_4_0'
                        # '&& <> l8_4_3_0 && <> l9_5_3_0 && <> l10_1_2_0'
@@ -62,17 +62,17 @@ class Task(object):
         # self.formula = 'l1_1_2_0'
         # self.formula = '(l1_1_2_0 && !l1_1_5_0) U l2_1_1_0'
         # ----------------- test the poset mining ---------------
-        # self.formula = '[] <> (l2_1_2_0 && <> l4_1_4_0)'
-        # self.formula = '<> l2_1_1_0 && <> l4_1_1_0 && l1_1_1_0 U l4_1_1_0'
+        self.formula = '[] <> (l2_1_2_0 && <> l4_1_4_0)'
+        self.formula = '<> l2_1_1_0 && <> l4_1_1_0 && l1_1_1_0 U l4_1_1_0'
         # self.formula = '<> (l4_1_2_1 && l3_1_1_0 && !l4_2_1) && <> l5_1_2_1 && [] !l2_1_1'
         # self.formula = '<> (l3_1_2_1 && <> l4_1_2_1)'
-        # self.formula = '<> (l3_1_2_1 && <> l4_1_2_1) && <> l5_2_1_0'
+        # self.formula = '[] <> (l3_1_2_1 && <> l4_1_2_1) && <> l5_2_1_0'
         # self.formula = '[] <> (l4_1_2_1 && <> l3_1_2_1) && <> l4_2_1_0 && ! l3_1_2 U l4_2_1_0'
         # self.formula = '(l1_1_2_0 && !l2_1_1) U (l2_1_2_0 && ! l1_2_1 && !l1_1_1)'
         # self.formula = '<> l2_1_1_0 && <> l4_2_1_0 && []!(l2_1_1 && l4_2_1)'
         # self.formula = '<> (l2_1_1_0 ||  ! l3_1_1)'
         # self.formula = '(l1_1_2_0) U (l2_1_2_0 )'
-        self.formula = '[]<> l2_1_12_0 && []<> l3_1_6_0 && [] <> l4_1_6_0 && (!l4_1_1 U (l5_1_1_0 && l6_1_1_0))'
+        # self.formula = '[]<> l2_1_12_0 && []<> l3_1_6_0 && [] <> l4_1_6_0 && (!l4_1_1 U (l5_1_1_0 && l6_1_1_0))'
         # self.formula = '[] <> (l4_1_1_1 && <> l3_1_1_1) && []! l2_1_1'
         # self.formula = '<> l2_1_1_1 && [] <> (l4_1_1_1  && l3_1_1_0)'
         # self.formula = '[] <> (l4_1_2_1 && <> l3_1_2_1) && []! l5_1_2 && <> [] l6_2_2_0'
@@ -80,7 +80,8 @@ class Task(object):
 
         # self.formula = '[]<>(l3_1_1_0 && !l1_1_1)'
         self.ap = [[['l3', 1, 2]], [['l2', 2, 1]]]
-
+        if formula:
+            self.formula = formula
         # case 3
         # self.formula = '[]<> (l1_1_3_1 && l4_4_4_0)  && []<> l2_3_3_2 && [] <> l3_1_3_1 && [] <> l5_3_3_2 && []<> l6_4_2_0' \
         #                '&& <> (l7_4_3_0 && (l8_5_3_3 || l10_5_3_3) && X <> l9_5_3_3) && <>[] l10_5_1_0'

@@ -5,10 +5,10 @@ from post_processing import run
 
 def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge, element_component_clause_literal_node,
                               poset_relation, init_type_robot_node, incomparable_element, larger_element,
-                              robot2eccl, factor, init_state, buchi, is_nonempty_self_loop):
+                              robot2eccl, init_state, buchi, is_nonempty_self_loop):
 
     M = 1e5
-    epsilon = 1/factor  # edge and previous edge
+    epsilon = 1  # edge and previous edge
     m = Model()
     # create variables
     x_vars, t_vars, c_vars, t_edge_vars, b_element_vars = create_variables(m, ts, poset, pruned_subgraph, element2edge,
