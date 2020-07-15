@@ -2,12 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="429973ab-9b76-4e6a-84c4-52a83ab96e95" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/GMAPP_loop.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GMAPP.py" afterPath="$PROJECT_DIR$/GMAPP.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/buchi_parse_aggressive.py" afterPath="$PROJECT_DIR$/buchi_parse_aggressive.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gurobi.log" afterPath="$PROJECT_DIR$/gurobi.log" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/milp.py" afterPath="$PROJECT_DIR$/milp.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/milp_suf.py" afterPath="$PROJECT_DIR$/milp_suf.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/post_processing.py" afterPath="$PROJECT_DIR$/post_processing.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stap.py" afterPath="$PROJECT_DIR$/stap.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/task.py" afterPath="$PROJECT_DIR$/task.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -18,35 +22,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="buchi_parse_aggressive.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/buchi_parse_aggressive.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-892">
-              <caret line="441" column="80" lean-forward="true" selection-start-line="441" selection-start-column="80" selection-end-line="441" selection-end-column="80" />
-              <folding>
-                <element signature="e#128#145#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="stap.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/stap.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1480">
-              <caret line="87" column="46" lean-forward="false" selection-start-line="87" selection-start-column="46" selection-end-line="87" selection-end-column="46" />
-              <folding>
-                <element signature="e#0#21#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="173">
-              <caret line="268" column="22" lean-forward="true" selection-start-line="268" selection-start-column="22" selection-end-line="268" selection-end-column="22" />
+            <state relative-caret-position="394">
+              <caret line="219" column="73" lean-forward="true" selection-start-line="219" selection-start-column="73" selection-end-line="219" selection-end-column="73" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -54,12 +34,15 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test.py">
+      <file leaf-file-name="GMAPP_loop.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/GMAPP_loop.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" column="15" lean-forward="false" selection-start-line="5" selection-start-column="15" selection-end-line="5" selection-end-column="15" />
-              <folding />
+            <state relative-caret-position="2595">
+              <caret line="206" column="0" lean-forward="false" selection-start-line="206" selection-start-column="0" selection-end-line="206" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#21#0" expanded="true" />
+                <element signature="e#978#2364#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -67,8 +50,8 @@
       <file leaf-file-name="post_processing.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/post_processing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="69" column="53" lean-forward="true" selection-start-line="69" selection-start-column="53" selection-end-line="69" selection-end-column="53" />
+            <state relative-caret-position="1093">
+              <caret line="100" column="60" lean-forward="false" selection-start-line="100" selection-start-column="60" selection-end-line="100" selection-end-column="60" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -79,12 +62,22 @@
       <file leaf-file-name="milp_suf.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/milp_suf.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="111" column="0" lean-forward="true" selection-start-line="111" selection-start-column="0" selection-end-line="111" selection-end-column="0" />
+            <state relative-caret-position="161">
+              <caret line="103" column="8" lean-forward="true" selection-start-line="103" selection-start-column="8" selection-end-line="103" selection-end-column="9" />
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
-                <element signature="e#7917#8557#0" expanded="false" />
+                <element signature="e#10918#11558#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="workspace_dars.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/workspace_dars.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1635">
+              <caret line="118" column="0" lean-forward="false" selection-start-line="118" selection-start-column="0" selection-end-line="120" selection-end-column="82" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -92,21 +85,21 @@
       <file leaf-file-name="milp.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/milp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="126" column="40" lean-forward="false" selection-start-line="126" selection-start-column="40" selection-end-line="126" selection-end-column="40" />
+            <state relative-caret-position="315">
+              <caret line="62" column="29" lean-forward="true" selection-start-line="62" selection-start-column="29" selection-end-line="62" selection-end-column="29" />
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
-                <element signature="e#8751#9391#0" expanded="false" />
+                <element signature="e#9563#10203#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GMAPP.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="GMAPP.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GMAPP.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="11" column="42" lean-forward="false" selection-start-line="11" selection-start-column="42" selection-end-line="11" selection-end-column="42" />
+            <state relative-caret-position="230">
+              <caret line="349" column="77" lean-forward="true" selection-start-line="349" selection-start-column="77" selection-end-line="349" selection-end-column="77" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -114,11 +107,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GMAPP_implication.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/GMAPP_implication.py">
+      <file leaf-file-name="task.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/task.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="29" column="15" lean-forward="false" selection-start-line="29" selection-start-column="15" selection-end-line="29" selection-end-column="15" />
+            <state relative-caret-position="348">
+              <caret line="66" column="80" lean-forward="true" selection-start-line="66" selection-start-column="80" selection-end-line="66" selection-end-column="80" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="buchi_parse_aggressive.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/buchi_parse_aggressive.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-932">
+              <caret line="418" column="29" lean-forward="true" selection-start-line="418" selection-start-column="29" selection-end-line="418" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -138,15 +141,11 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>next_</find>
-      <find>init</find>
-      <find>'init'</find>
       <find>skip</find>
       <find>sat_vertex</find>
       <find>sat_init_edge</find>
       <find>one_c</find>
       <find>init'</find>
-      <find>same</find>
       <find>robot2</find>
       <find>b_ele</find>
       <find>mapp</find>
@@ -154,19 +153,23 @@
       <find>b_element_vars</find>
       <find>gap</find>
       <find>100</find>
-      <find>merge</find>
       <find>init_</find>
       <find>sys</find>
       <find>print_red_on_cyan</find>
-      <find>print</find>
       <find>sorted</find>
       <find>regions</find>
       <find>get_init</find>
-      <find>ma</find>
       <find>essential</find>
       <find>model is</find>
+      <find>ma</find>
       <find>run\(</find>
+      <find>dij</find>
       <find>milp</find>
+      <find>none</find>
+      <find>print</find>
+      <find>same</find>
+      <find>same ro</find>
+      <find>merge</find>
       <find>vis</find>
     </findStrings>
     <replaceStrings>
@@ -188,22 +191,22 @@
         <option value="$PROJECT_DIR$/workspace_dars.py" />
         <option value="$PROJECT_DIR$/weighted_ts.py" />
         <option value="$PROJECT_DIR$/test.py" />
-        <option value="$PROJECT_DIR$/GMAPP.py" />
-        <option value="$PROJECT_DIR$/task.py" />
-        <option value="$PROJECT_DIR$/buchi_parse_aggressive.py" />
-        <option value="$PROJECT_DIR$/milp.py" />
-        <option value="$PROJECT_DIR$/milp_suf.py" />
         <option value="$PROJECT_DIR$/stap.py" />
+        <option value="$PROJECT_DIR$/GMAPP_loop.py" />
+        <option value="$PROJECT_DIR$/milp.py" />
         <option value="$PROJECT_DIR$/post_processing.py" />
+        <option value="$PROJECT_DIR$/GMAPP.py" />
+        <option value="$PROJECT_DIR$/milp_suf.py" />
+        <option value="$PROJECT_DIR$/buchi_parse_aggressive.py" />
+        <option value="$PROJECT_DIR$/task.py" />
         <option value="$PROJECT_DIR$/main.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" fullScreen="true">
     <option name="x" value="1440" />
-    <option name="y" value="23" />
-    <option name="width" value="960" />
-    <option name="height" value="1057" />
+    <option name="width" value="1920" />
+    <option name="height" value="1080" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -220,6 +223,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
@@ -232,7 +236,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -256,7 +259,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.test">
+  <component name="RunManager" selected="Python.main">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -315,8 +318,8 @@
     </list>
     <recent_temporary>
       <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Python.test" />
-        <item index="1" class="java.lang.String" itemvalue="Python.main" />
+        <item index="0" class="java.lang.String" itemvalue="Python.main" />
+        <item index="1" class="java.lang.String" itemvalue="Python.test" />
         <item index="2" class="java.lang.String" itemvalue="Python.stap" />
       </list>
     </recent_temporary>
@@ -335,18 +338,18 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1440" y="23" width="960" height="1057" extended-state="0" />
+    <frame x="1440" y="0" width="1920" height="1080" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2472767" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24920128" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.40149096" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.034552846" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3290735" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24945533" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3290735" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32800853" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32723576" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -409,6 +412,11 @@
           <line>84</line>
           <option name="timeStamp" value="197" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>285</line>
+          <option name="timeStamp" value="218" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -417,19 +425,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="216" />
+      <option name="time" value="219" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/task.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1140">
-          <caret line="76" column="36" lean-forward="true" selection-start-line="76" selection-start-column="36" selection-end-line="76" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/buchi_parse.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="5160">
@@ -454,7 +454,7 @@
           <caret line="95" column="31" lean-forward="false" selection-start-line="95" selection-start-column="31" selection-end-line="95" selection-end-column="31" />
           <folding>
             <element signature="e#0#22#0" expanded="true" />
-            <element signature="e#8751#9391#0" expanded="false" />
+            <element signature="e#9563#10203#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -670,19 +670,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workspace.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="23" lean-forward="false" selection-start-line="0" selection-start-column="23" selection-end-line="0" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Library/Caches/PyCharmCE2017.2/python_stubs/984530540/builtins.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1195">
           <caret line="156" column="4" lean-forward="false" selection-start-line="156" selection-start-column="4" selection-end-line="156" selection-end-column="4" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -690,7 +681,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="334">
           <caret line="124" column="11" lean-forward="false" selection-start-line="124" selection-start-column="11" selection-end-line="124" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -698,17 +688,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="179">
           <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#22#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/workspace_dars.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="22" column="13" lean-forward="true" selection-start-line="22" selection-start-column="13" selection-end-line="22" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -716,7 +695,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="274">
           <caret line="310" column="0" lean-forward="false" selection-start-line="310" selection-start-column="0" selection-end-line="310" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -725,7 +703,6 @@
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="0">
             <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-            <folding />
           </first_editor>
           <second_editor />
         </state>
@@ -741,37 +718,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/task.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="82" column="52" lean-forward="true" selection-start-line="82" selection-start-column="52" selection-end-line="82" selection-end-column="52" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/buchi_parse_aggressive.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-892">
-          <caret line="441" column="80" lean-forward="true" selection-start-line="441" selection-start-column="80" selection-end-line="441" selection-end-column="80" />
-          <folding>
-            <element signature="e#128#145#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/GMAPP_implication.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
           <caret line="29" column="15" lean-forward="false" selection-start-line="29" selection-start-column="15" selection-end-line="29" selection-end-column="15" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MAPP.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="17" column="1" lean-forward="false" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -785,50 +735,45 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/milp_suf.py">
+    <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="111" column="0" lean-forward="true" selection-start-line="111" selection-start-column="0" selection-end-line="111" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-            <element signature="e#7917#8557#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="285">
+          <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/milp.py">
+    <entry file="file://$PROJECT_DIR$/workspace.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="126" column="40" lean-forward="false" selection-start-line="126" selection-start-column="40" selection-end-line="126" selection-end-column="40" />
+        <state relative-caret-position="0">
+          <caret line="0" column="23" lean-forward="false" selection-start-line="0" selection-start-column="23" selection-end-line="0" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workspace_dars.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1635">
+          <caret line="118" column="0" lean-forward="false" selection-start-line="118" selection-start-column="0" selection-end-line="120" selection-end-column="82" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GMAPP_loop.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2595">
+          <caret line="206" column="0" lean-forward="false" selection-start-line="206" selection-start-column="0" selection-end-line="206" selection-end-column="0" />
           <folding>
-            <element signature="e#0#22#0" expanded="true" />
-            <element signature="e#8751#9391#0" expanded="false" />
+            <element signature="e#0#21#0" expanded="true" />
+            <element signature="e#978#2364#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/post_processing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="69" column="53" lean-forward="true" selection-start-line="69" selection-start-column="53" selection-end-line="69" selection-end-column="53" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="15" lean-forward="false" selection-start-line="5" selection-start-column="15" selection-end-line="5" selection-end-column="15" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="173">
-          <caret line="268" column="22" lean-forward="true" selection-start-line="268" selection-start-column="22" selection-end-line="268" selection-end-column="22" />
+        <state relative-caret-position="1093">
+          <caret line="100" column="60" lean-forward="false" selection-start-line="100" selection-start-column="60" selection-end-line="100" selection-end-column="60" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
@@ -837,11 +782,67 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/GMAPP.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" column="42" lean-forward="false" selection-start-line="11" selection-start-column="42" selection-end-line="11" selection-end-column="42" />
+        <state relative-caret-position="230">
+          <caret line="349" column="77" lean-forward="true" selection-start-line="349" selection-start-column="77" selection-end-line="349" selection-end-column="77" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/milp.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="62" column="29" lean-forward="true" selection-start-line="62" selection-start-column="29" selection-end-line="62" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+            <element signature="e#9563#10203#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MAPP.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="17" column="1" lean-forward="false" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/buchi_parse_aggressive.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-932">
+          <caret line="418" column="29" lean-forward="true" selection-start-line="418" selection-start-column="29" selection-end-line="418" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="394">
+          <caret line="219" column="73" lean-forward="true" selection-start-line="219" selection-start-column="73" selection-end-line="219" selection-end-column="73" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/milp_suf.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="161">
+          <caret line="103" column="8" lean-forward="true" selection-start-line="103" selection-start-column="8" selection-end-line="103" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+            <element signature="e#10918#11558#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/task.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="348">
+          <caret line="66" column="80" lean-forward="true" selection-start-line="66" selection-start-column="80" selection-end-line="66" selection-end-column="80" />
+          <folding />
         </state>
       </provider>
     </entry>

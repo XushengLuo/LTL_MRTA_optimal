@@ -8,7 +8,8 @@ print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
 def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge, element_component_clause_literal_node,
                               poset_relation, init_type_robot_node, incomparable_element, larger_element,
-                              robot2eccl, id2robots, init_state, buchi, is_nonempty_self_loop):
+                              robot2eccl, id2robots, init_state, buchi, is_nonempty_self_loop,
+                              exe_robot_next_vertex_pre):
     M = 1e5
     epsilon = 1  # edge and previous edge
     m = Model()
@@ -45,16 +46,44 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
                             M * b_element_vars[(element, another_element)] - epsilon)
     m.update()
 
-    # using same robot (22)
+    # using same robot
     for robot, eccls in robot2eccl.items():
-        clause = [list(group) for key, group in itertools.groupby(eccls, operator.itemgetter(0, 1))]
-        num_vertex = len(element_component_clause_literal_node[eccls[0]])
-        for c in clause:
-            for l in c:
-                for vertex in range(num_vertex):
-                    w = element_component_clause_literal_node[l][vertex]
-                    m.addConstr(quicksum(x_vars[(p, w, id2robots[robot][vertex])] for p in ts.predecessors(w))
-                                == c_vars[l[:-1]])
+        # using same robot (22)
+        if robot in id2robots.keys():
+            clause = [list(group) for key, group in itertools.groupby(eccls, operator.itemgetter(0, 1))]
+            num_vertex = len(element_component_clause_literal_node[eccls[0]])
+            for c in clause:
+                for l in c:
+                    for vertex in range(num_vertex):
+                        w = element_component_clause_literal_node[l][vertex]
+                        m.addConstr(quicksum(x_vars[(p, w, id2robots[robot][vertex])] for p in ts.predecessors(w))
+                                    == c_vars[l[:-1]])
+
+        # using same robot (20a) and (20b)
+        else:
+            clause = [list(group) for key, group in itertools.groupby(eccls, operator.itemgetter(0, 1))]
+            num_vertex = len(element_component_clause_literal_node[eccls[0]])
+            num_robot = type_num[ts.nodes[element_component_clause_literal_node[eccls[0]][0]]
+            ['location_type_component_element'][1]]
+            for l_base in clause[0]:
+                for c in clause[1:]:
+                    for l in c:
+                        for vertex in range(num_vertex):
+                            v = element_component_clause_literal_node[l_base][vertex]
+                            w = element_component_clause_literal_node[l][vertex]
+                            for k in range(num_robot):
+                                m.addConstr(quicksum(x_vars[(p, w, k)] for p in ts.predecessors(w))
+                                            + M * (c_vars[l[:-1]] - 1) <=
+                                            quicksum(x_vars[(p, v, k)] for p in ts.predecessors(v))
+                                            + M * (1 - c_vars[l_base[:-1]]))
+
+                                m.addConstr(quicksum(x_vars[(p, v, k)] for p in ts.predecessors(v))
+                                            + M * (c_vars[l_base[:-1]] - 1) <=
+                                            quicksum(x_vars[(p, w, k)] for p in ts.predecessors(w))
+                                            + M * (1 - c_vars[l[:-1]]))
+
+
+
     m.update()
     # focus on label
     for element in poset:
@@ -69,6 +98,26 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
             self_loop_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, element, self_loop_label,
                                   incomparable_element, poset_relation, element_component_clause_literal_node, type_num,
                                   M, buchi)
+
+    # return to the same region obtained in the prefix part to close the loop
+    if exe_robot_next_vertex_pre:  # postive literals exist
+        c = list(exe_robot_next_vertex_pre.keys())[0][0]
+        for element in poset:
+            if ('artificial', 'next_artificial') == element2edge[element]:
+                # the same clause in the vertex of next_vertex should be satisfied
+                m.addConstr(c_vars[(element, 0, c)] == 1)
+
+                self_loop_label = pruned_subgraph.nodes[element2edge[element][0]]['label']
+                # the same set of robots satisfy the literal as in the prefix part
+                for l in range(len(self_loop_label[c])):
+                    # only consider literals with zero indicator, since non-zero indicator
+                    # has been consdiered by the same robot constraint (22)
+                    if self_loop_label[c][l][3] == 0:
+                        nodes = element_component_clause_literal_node[(element, 0, c, l)]
+                        for index, i in enumerate(nodes):
+                            k = exe_robot_next_vertex_pre[(c, l)][index][1]
+                            m.addConstr(quicksum(x_vars[(p, i, k)] for p in ts.predecessors(i)) == 1)
+                break
 
     expr = LinExpr([0.7 * ts.edges[tuple(index[:2])]['weight'] for index in x_vars.keys()], list(x_vars.values()))
     expr.add(LinExpr([0.3] * len([key for key in t_edge_vars.keys()]),
@@ -93,7 +142,7 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
     else:
         print('Optimization ended with status %d' % m.status)
     if m.status != GRB.Status.OPTIMAL:
-        return None, None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None, None, None, None
 
     goal = 0
     for index in x_vars.keys():
@@ -111,12 +160,12 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
         = get_waypoint(x_vars, t_vars, ts, init_type_robot_node, time_axis)
 
     # extract the run
-    acpt_run, exe_robot_next_vertex = run(pruned_subgraph, time_axis, init_state, element2edge,
+    acpt_run, exe_robot_next_vertex, essential_clause_next_vertex, neg_clause_next_vertex = run(pruned_subgraph, time_axis, init_state, element2edge,
                                           {'x': x_vars, 'c': c_vars, 't': t_edge_vars},
                                           element_component_clause_literal_node, ts, type_num, is_nonempty_self_loop)
 
     return robot_waypoint_pre, robot_time_pre, id2robots, robot_label_pre, robot_waypoint_axis, robot_time_axis, \
-           time_axis, acpt_run, exe_robot_next_vertex
+           time_axis, acpt_run, exe_robot_next_vertex, essential_clause_next_vertex, neg_clause_next_vertex
 
 
 def create_variables(m, ts, poset, pruned_subgraph, element2edge, type_num):

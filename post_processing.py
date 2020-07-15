@@ -56,7 +56,7 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
                     = determine_essentials(instant_element, var, graph.nodes[node]['label'],
                                            graph.nodes[node]['neg_label'], 0,
                                            element_component_clause_literal_node, ts, type_num,
-                                           pre_essential_clause_edge)
+                                           pre_essential_clause_edge, essential_clause_edge)
 
                 # clock, the exact time when transition occurs
                 acpt_run = acpt_run_.copy()  # copy the history
@@ -69,21 +69,27 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
                 # find the set of robots that satisfy the vertex label of the next vertex
                 # which will be used to close the loop
                 if not is_nonempty_self_loop and 'artificial' in node:
-                    exe_robots_vertex = determine_robots_for_next(instant_element, var, graph.nodes[node]['label'],
-                                                                  element_component_clause_literal_node, ts,
-                                                                  type_num)
+                    exe_robots_vertex, essential_clause_vertex, neg_clause_vertex = determine_robots_for_next(
+                        instant_element, var,
+                        graph.nodes[node]['label'],
+                        graph.nodes[node]['neg_label'],
+                        element_component_clause_literal_node,
+                        ts,
+                        type_num,
+                        pre_essential_clause_edge)
 
                 # 1: self-loop exists, stop when artificial is reached
                 # 2: self-loop does not exist, stop when next_artificial is reached
                 if (is_nonempty_self_loop and 'artificial' in succ) or \
                         (not is_nonempty_self_loop and 'next_artificial' in succ):
-                    return acpt_run, exe_robots_vertex
+                    return acpt_run, exe_robots_vertex, essential_clause_vertex, neg_clause_vertex
                 # clock + 1, after reaching succ, the immediate time clock that should be verified
                 frontier.append([succ, clock + 1, acpt_run])
 
 
 def determine_essentials(instant_element, var, label, neg_label, component,
-                         element_component_clause_literal_node, ts, type_num, pre_complete_clause_formula=[]):
+                         element_component_clause_literal_node, ts, type_num, pre_complete_clause_formula=[],
+                         cur_complete_clause_formula=[]):
     """
     determine the essential clause and the essential robots
     """
@@ -91,7 +97,11 @@ def determine_essentials(instant_element, var, label, neg_label, component,
         # negative clause that is conjunctive with satisfied positive literals
         if neg_label:
             for clause in neg_label:
+                # do not exclude with previous edge label
                 if not_exclusion(pre_complete_clause_formula, clause):
+                    neg_clause = clause
+                # might as well exclude with the current edge label
+                if not not_exclusion(cur_complete_clause_formula, clause):
                     neg_clause = clause
                     break
         else:
@@ -137,32 +147,42 @@ def not_exclusion(pre_complete_clause_formula, neg_clause):
         return True
 
 
-def determine_robots_for_next(instant_element, var, label, element_component_clause_literal_node,
-                              ts, type_num):
+def determine_robots_for_next(instant_element, var, label, neg_label, element_component_clause_literal_node,
+                              ts, type_num, pre_complete_clause_formula):
     """
     determine the essential robots for the vertex label of the next vertex, i.e., artificial robot
     """
     if label == '1':
-        return '1'
+        # negative clause that is conjunctive with satisfied positive literals
+        if neg_label:
+            for clause in neg_label:
+                if not_exclusion(pre_complete_clause_formula, clause):
+                    neg_clause = clause
+                    break
+        else:
+            neg_clause = []
+        return dict(), '1', neg_clause
     else:
         if label:
             essential_clause = []
+            neg_clause = []
             # iterate over all elements with identical completion times
             for c, clause in enumerate(label):
                 # determine the clause valued 1
                 if var['c'][(instant_element[1], 0, c)].x == 1:
                     essential_clause = clause
+                    neg_clause = neg_label[c]
                     break
 
-            exe_robots = {tuple(lit): [] for lit in essential_clause}
+            exe_robots = {(c, l): [] for l in range(len(essential_clause))}
             for l, lit in enumerate(essential_clause):
                 for i in element_component_clause_literal_node[(instant_element[1], 0, c, l)]:
                     for k in range(type_num[ts.nodes[i]['location_type_component_element'][1]]):
                         if sum([round(var['x'][(p, i, k)].x) for p in ts.predecessors(i)]) == 1:
-                            exe_robots[tuple(lit)].append((lit[1], k))
+                            exe_robots[(c, l)].append((lit[1], k))
                             break
         # empty label
         else:
-            return '1'
+            return dict(), '1', []
 
-    return exe_robots
+    return exe_robots, essential_clause, neg_clause

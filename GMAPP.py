@@ -277,8 +277,6 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, is_nonempty_sel
             effective_length = len(acpt_run)-3
 
         while clock < effective_length:
-            print(acpt_run[clock+1]['subtask'])
-
             # check if the initial robot locations satisfy the first subtask or the current subtask is '1'
             # if yes, update the local progress of robots that participate and global clock
             if acpt_run[clock+1]['subtask'] in buchi.sat_init_edge:  # or acpt_run[clock+1]['essential_clause_edge'] == '1':
@@ -384,6 +382,8 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, is_nonempty_sel
             # update the overall plan
             for subseq_clock in range(clock+1, len(acpt_run)):
                 acpt_run[subseq_clock]['time_element'][0] = acpt_run[subseq_clock]['time_element'][0] + T - horizon
+
+            print(acpt_run[clock + 1]['subtask'], acpt_run[clock+1]['time_element'][0])
             # restore removed edges
             workspace.graph_workspace.add_edges_from(itertools.chain(remove_edge))
             # plt.show()

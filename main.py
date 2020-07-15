@@ -17,6 +17,8 @@ from GMAPP import mapp
 from vis import vis
 import sys
 from termcolor import colored, cprint
+from GMAPP_loop import mapp_for_loop
+
 
 print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
@@ -108,19 +110,20 @@ def ltl_mrta(formula):
                 print('partial time before milp: {0}'.format((datetime.now() - start).total_seconds()))
 
                 # --------------------- MILP -------------------------
-                robot_waypoint_pre, robot_time_pre, id2robots, robot_label_pre, robot_waypoint_axis, robot_time_axis, \
-                time_axis, acpt_run, exe_robot_next_vertex_pre = milp.construct_milp_constraint(ts, workspace.type_num,
-                                                                                                pos,
-                                                                                                pruned_subgraph,
-                                                                                                element2edge,
-                                                                                                element_component_clause_literal_node,
-                                                                                                poset_relation,
-                                                                                                init_type_robot_node,
-                                                                                                incomparable_element,
-                                                                                                larger_element,
-                                                                                                robot2eccl, init_state,
-                                                                                                buchi,
-                                                                                                is_nonempty_self_loop)
+                robot_waypoint_pre, robot_time_pre, id2robots, robot_label_pre, \
+                robot_waypoint_axis, robot_time_axis, time_axis, acpt_run, \
+                exe_robot_next_vertex_pre, essential_clause_next_vertex_pre, \
+                neg_clause_next_vertex_pre = milp.construct_milp_constraint(ts, workspace.type_num, pos,
+                                                                            pruned_subgraph,
+                                                                            element2edge,
+                                                                            element_component_clause_literal_node,
+                                                                            poset_relation,
+                                                                            init_type_robot_node,
+                                                                            incomparable_element,
+                                                                            larger_element,
+                                                                            robot2eccl, init_state,
+                                                                            buchi,
+                                                                            is_nonempty_self_loop)
                 if not robot_waypoint_pre:
                     continue
 
@@ -163,8 +166,8 @@ def ltl_mrta(formula):
                 if is_nonempty_self_loop:
                     print_red_on_cyan(task.formula)
                     print_red_on_cyan('A path is found for the case where the accepting state has a self-loop')
-                    # vis(workspace, robot_path_pre, {robot: [len(path)] * 2 for robot, path in robot_path_pre.items()},
-                    #     [])
+                    vis(workspace, robot_path_pre, {robot: [len(path)] * 2 for robot, path in robot_path_pre.items()},
+                        [])
 
                     return
 
@@ -213,21 +216,23 @@ def ltl_mrta(formula):
                         # --------------------- MILP -------------------------
                         init_state = next_vertex
                         robot_waypoint_suf, robot_time_suf, _, robot_label_suf, robot_waypoint_axis, robot_time_axis, \
-                        time_axis, acpt_run, exe_robot_next_vertex_suf = milp_suf.construct_milp_constraint(ts,
-                                                                                                            workspace.type_num,
-                                                                                                            pos,
-                                                                                                            pruned_subgraph,
-                                                                                                            element2edge,
-                                                                                                            element_component_clause_literal_node,
-                                                                                                            poset_relation,
-                                                                                                            init_type_robot_node,
-                                                                                                            incomparable_element,
-                                                                                                            larger_element,
-                                                                                                            robot2eccl,
-                                                                                                            id2robots,
-                                                                                                            init_state,
-                                                                                                            buchi,
-                                                                                                            is_nonempty_self_loop)
+                        time_axis, acpt_run, exe_robot_next_vertex_suf, essential_clause_next_vertex_suf, \
+                        neg_clause_next_vertex_suf = milp_suf.construct_milp_constraint(ts,
+                                                                                        workspace.type_num,
+                                                                                        pos,
+                                                                                        pruned_subgraph,
+                                                                                        element2edge,
+                                                                                        element_component_clause_literal_node,
+                                                                                        poset_relation,
+                                                                                        init_type_robot_node,
+                                                                                        incomparable_element,
+                                                                                        larger_element,
+                                                                                        robot2eccl,
+                                                                                        id2robots,
+                                                                                        init_state,
+                                                                                        buchi,
+                                                                                        is_nonempty_self_loop,
+                                                                                        exe_robot_next_vertex_pre)
                         if not robot_waypoint_suf:
                             continue
 
@@ -269,12 +274,19 @@ def ltl_mrta(formula):
                         end = datetime.now()
                         print('total time for the prefix + suffix parts: {0}'.format((end - start).total_seconds()))
 
-                        robot_path = {robot: path + robot_path_suf[robot][1:] for robot, path in robot_path_pre.items()}
+                        robot_path_loop = mapp_for_loop(exe_robot_next_vertex_pre,
+                                                        {robot: path[0] for robot, path in robot_path_suf.items()},
+                                                        {robot: path[-1] for robot, path in robot_path_suf.items()},
+                                                        essential_clause_next_vertex_pre, neg_clause_next_vertex_pre,
+                                                        workspace)
+                        robot_path = {robot: path + robot_path_suf[robot][1:] + robot_path_loop[robot][1:] +
+                                             robot_path_suf[robot][1:] + robot_path_loop[robot][1:] for
+                                      robot, path in robot_path_pre.items()}
 
                         print_red_on_cyan(task.formula)
                         print_red_on_cyan(
                             'A path is found for the case where the accepting state does not have a self-loop')
-                        # vis(workspace, robot_path, {robot: [len(path)] * 2 for robot, path in robot_path.items()}, [])
+                        vis(workspace, robot_path, {robot: [len(path)] * 2 for robot, path in robot_path.items()}, [])
 
                         return
 
