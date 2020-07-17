@@ -25,6 +25,7 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
     # edge time constraints -- eq (12)
     for element in poset:
         edge_label = pruned_subgraph.edges[element2edge[element]]['label']
+        # must have vertices
         if edge_label != '1':
             m.addConstr(quicksum(t_vars[(element_component_clause_literal_node[(element, 1, c, 0)][0], k, 1)]
                                  for c in range(len(edge_label)) for k in range(
@@ -33,7 +34,7 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
 
     m.update()
 
-    # binary relation between edge time -- eq (14)
+    # binary relation between edge time -- eq (16)
     # no matter the edge label is '1' or not
     for element in poset:
         for another_element in poset:
@@ -310,7 +311,7 @@ def edge_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars,
                                 quicksum(t_vars[(i, k, 1)] for k in
                                          range(type_num[ts.nodes[i]['location_type_component_element'][1]])))
 
-    # timing constraints between a node and its outgoing edge -- eq (16)
+    # timing constraints between a node and its outgoing edge -- eq (13)
     strict_incmp = [order[0] for order in poset_relation if order[1] == element] + incomparable_element[element]
     z = len(strict_incmp) - 1
     if self_loop_label and ((self_loop_label != '1' and z != -1) or
@@ -327,24 +328,14 @@ def edge_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars,
                         type_num[ts.nodes[i]['location_type_component_element'][1]]))
                                 + 1 + M * (1 - c_vars[(element, 0, c_self_loop)]))
     # the vertex label is false, or the initial robot locations satisfy the not true vertex label of initial vertex,
-    # the edge label becomes true at 0, following after (16)
+    # the edge label becomes true at 0, --- (14)
     if z == -1 and (not self_loop_label or (self_loop_label != '1' and not buchi.sat_vertex)):
         m.addConstr(t_edge_vars[element] == 0)
 
-    # precedence timing constraints, between edge and previous edge, with vertex label, covered by -- eq (13)
+    # precedence timing constraints, between edge and previous edge, with vertex label, covered by -- eq (15)
     for order in poset_relation:
         if order[1] == element:
             m.addConstr(t_edge_vars[order[0]] + epsilon <= t_edge_vars[element])
-
-    # precedence timing constraints between edge and previoud edge while no vertex label and not the first subtask
-    # eq (15)
-    if not self_loop_label and z != -1:
-        for e in strict_incmp:
-            m.addConstr(t_edge_vars[e] + 1 + M * (quicksum(b_element_vars[(e, o)] for o in strict_incmp if o != e) - z)
-                        <= t_edge_vars[element])
-            m.addConstr(t_edge_vars[element] <= t_edge_vars[e] + 1 + M * (z - quicksum(b_element_vars[(e, o)]
-                                                                                       for o in strict_incmp if
-                                                                                       o != e)))
 
     m.update()
 
@@ -379,7 +370,7 @@ def self_loop_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_
                                                               quicksum(b_element_vars[(e, o)] for o in strict_incmp if
                                                                        o != e)))
         # there is no prior subtasks, and the initial robot locations satisfy the vertex label, which is not true
-        # then the vertex label is activated at 0 ----- eq (19)
+        # then the vertex label is activated at 0 ----- eq (18)
         elif z == -1 and buchi.sat_vertex:
             for l in range(len(self_loop_label[c])):
                 for j in element_component_clause_literal_node[(element, 0, c, l)]:

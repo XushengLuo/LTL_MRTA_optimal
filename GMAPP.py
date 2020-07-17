@@ -280,8 +280,9 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, is_nonempty_sel
             # check if the initial robot locations satisfy the first subtask or the current subtask is '1'
             # if yes, update the local progress of robots that participate and global clock
             if acpt_run[clock+1]['subtask'] in buchi.sat_init_edge:  # or acpt_run[clock+1]['essential_clause_edge'] == '1':
-                for robot in acpt_run[clock+1]['essential_robot_edge'].values():
-                    robot_progress[robot] += 1
+                for robots in acpt_run[clock + 1]['essential_robot_edge'].values():
+                    for robot in robots:
+                        robot_progress[robot] += 1
                 clock += 1
                 continue
 
@@ -341,7 +342,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, is_nonempty_sel
             # expected horizon according to high-level plan
             horizon = next_time - past_time
             robot_init = {robot: path[-1] for robot, path in robot_path.items()}
-            for T in range(horizon, horizon + 100, 1):
+            for T in range(horizon, horizon + 100, 5):
                 mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
                                                        robot_init, is_single_subtask)
                 if mapp_paths:

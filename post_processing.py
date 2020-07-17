@@ -33,9 +33,9 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
             # the successor of initial vertex does not include the arificial vertex
             if clock + 1 == 0 and succ == 'artificial':
                 continue
-            # the successor of accepting vertex does not include other vertcies than the artificial vertex
-            if clock + 1 != 0 and 'accept' in node and succ != 'artificial':
-                continue
+            # # the successor of accepting vertex does not include other vertcies than the artificial vertex
+            # if clock + 1 != 0 and 'accept' in node and succ != 'artificial':
+            #     continue
             # equivalent subtask
             if graph.edges[element2edge[instant_element[1]]]['formula'] == graph.edges[(node, succ)]['formula'] and \
                             graph.nodes[element2edge[instant_element[1]][0]]['formula'] == graph.nodes[node]['formula']:
@@ -79,9 +79,9 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
                         pre_essential_clause_edge)
 
                 # 1: self-loop exists, stop when artificial is reached
-                # 2: self-loop does not exist, stop when next_artificial is reached
+                # 2: self-loop does not exist, stop when accept is reached
                 if (is_nonempty_self_loop and 'artificial' in succ) or \
-                        (not is_nonempty_self_loop and 'next_artificial' in succ):
+                        (not is_nonempty_self_loop and 'accept' in succ):
                     return acpt_run, exe_robots_vertex, essential_clause_vertex, neg_clause_vertex
                 # clock + 1, after reaching succ, the immediate time clock that should be verified
                 frontier.append([succ, clock + 1, acpt_run])
