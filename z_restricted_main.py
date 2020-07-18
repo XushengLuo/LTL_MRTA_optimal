@@ -197,6 +197,11 @@ def ltl_mrta(formula):
 
                 for _, poset_relation, pos, hasse_diagram in hasse_graphs:
 
+                    for order in poset_relation:
+                        print(pruned_subgraph.edges[element2edge[order[0]]]['formula'], ' -> ',
+                              pruned_subgraph.edges[element2edge[order[1]]]['formula'])
+                    print('----------------------------------------------')
+
                     robot2eccl = z_restricted_poset.element2robot2eccl(pos, element2edge, pruned_subgraph)
 
                     incomparable_element, larger_element = z_restricted_poset.incomparable_larger(pos, hasse_diagram,
@@ -205,11 +210,12 @@ def ltl_mrta(formula):
                     # --------------- construct the routing graph ---------------
                     minimal_element = [node for node in hasse_diagram.nodes() if hasse_diagram.out_degree(node) == 0]
                     init_type_robot_node, element_component_clause_literal_node, node_location_type_component_element, \
-                    num_nodes, final_element_type_robot_node = z_restricted_weighted_ts_suffix.construct_node_set(pos,
-                                                                                                                  element2edge,
-                                                                                                                  pruned_subgraph,
-                                                                                                                  workspace.type_robot_label,
-                                                                                                                  minimal_element)
+                    num_nodes, final_element_type_robot_node \
+                        = z_restricted_weighted_ts_suffix.construct_node_set(pos,
+                                                                             element2edge,
+                                                                             pruned_subgraph,
+                                                                             workspace.type_robot_label,
+                                                                             minimal_element)
 
                     edge_set = z_restricted_weighted_ts_suffix.construct_edge_set(pos,
                                                                                   element_component_clause_literal_node,
@@ -226,8 +232,7 @@ def ltl_mrta(formula):
 
                     # --------------------- MILP -------------------------
                     robot_waypoint_suf, robot_time_suf, _, robot_label_suf, robot_waypoint_axis, robot_time_axis, \
-                    time_axis, acpt_run, exe_robot_next_vertex_suf, essential_clause_next_vertex_suf, \
-                    neg_clause_next_vertex_suf \
+                    time_axis, acpt_run \
                         = z_restricted_milp_suf.construct_milp_constraint(ts,
                                                                           workspace.type_num,
                                                                           pos,
@@ -240,11 +245,12 @@ def ltl_mrta(formula):
                                                                           larger_element,
                                                                           robot2eccl,
                                                                           id2robots,
-                                                                          init_state,
+                                                                          accept_state,
                                                                           buchi,
                                                                           is_nonempty_self_loop,
                                                                           minimal_element,
-                                                                          final_element_type_robot_node)
+                                                                          final_element_type_robot_node,
+                                                                          workspace.type_robot_label)
                     if not robot_waypoint_suf:
                         continue
 

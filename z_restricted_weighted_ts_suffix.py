@@ -163,8 +163,8 @@ def construct_edge_set_minimal_helper(element, component, element_component2labe
                         if type_robot[0] == in_label[1]:  # same robot type
                             for in_eccl in in_eccls:
                                 # randomly set one node
-                                from_node = element_component_clause_literal_node[in_eccl][0]
-                                edge_set.append((from_node, to_node))
+                                edge_set += list(itertools.product(element_component_clause_literal_node[in_eccl],
+                                                                   [to_node]))
                 except KeyError:  # label is 1
                     pass
 
@@ -175,8 +175,8 @@ def construct_edge_set_minimal_helper(element, component, element_component2labe
                 for in_label, in_eccls in element_component2label[(element, 0)].items():
                     if type_robot[0] == in_label[1]:  # same robot type
                         for in_eccl in in_eccls:
-                            from_node = element_component_clause_literal_node[in_eccl][0]
-                            edge_set.append((from_node, to_node))
+                            edge_set += list(itertools.product(element_component_clause_literal_node[in_eccl],
+                                                               [to_node]))
 
             except KeyError:
                 pass

@@ -1,6 +1,6 @@
 from gurobipy import *
 import math
-from post_processing import run
+from z_restricted_post_processing import run
 from termcolor import colored, cprint
 
 print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
@@ -9,7 +9,7 @@ print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge, element_component_clause_literal_node,
                               poset_relation, init_type_robot_node, incomparable_element, larger_element,
                               robot2eccl, id2robots, init_state, buchi, is_nonempty_self_loop,
-                              exe_robot_next_vertex_pre, minimal_element, final_element_type_robot_node):
+                              minimal_element, final_element_type_robot_node, type_robot_label):
     M = 1e5
     epsilon = 1  # edge and previous edge
     m = Model()
@@ -26,11 +26,26 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
     # edge time constraints -- eq (12)
     for element in poset:
         edge_label = pruned_subgraph.edges[element2edge[element]]['label']
-        if edge_label != '1':
+        if edge_label != '1' and element in minimal_element:  # extra literals
+            extra_node = list(final_element_type_robot_node[element].values())[0]
+            m.addConstr(quicksum([t_vars[(element_component_clause_literal_node[(element, 1, c, 0)][0], k, 1)]
+                                 for c in range(len(edge_label)) for k in range(
+                type_num[ts.nodes[element_component_clause_literal_node[(element, 1, c, 0)][0]]
+                ['location_type_component_element'][1]])] +
+                                 [t_vars[(extra_node, k, 1)]
+                                  for k in range(type_num[ts.nodes[extra_node]['location_type_component_element'][1]])])
+                        == t_edge_vars[element])
+        elif edge_label != '1':
             m.addConstr(quicksum(t_vars[(element_component_clause_literal_node[(element, 1, c, 0)][0], k, 1)]
                                  for c in range(len(edge_label)) for k in range(
                 type_num[ts.nodes[element_component_clause_literal_node[(element, 1, c, 0)][0]]
                 ['location_type_component_element'][1]])) == t_edge_vars[element])
+
+        elif edge_label == '1' and element in minimal_element:
+            extra_node = list(final_element_type_robot_node[element].values())[0]
+            m.addConstr(quicksum([t_vars[(extra_node, k, 1)]
+                                  for k in range(type_num[ts.nodes[extra_node]['location_type_component_element'][1]])])
+                        == t_edge_vars[element])
 
     m.update()
 
@@ -82,42 +97,24 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
                                             quicksum(x_vars[(p, w, k)] for p in ts.predecessors(w))
                                             + M * (1 - c_vars[l[:-1]]))
 
-
-
     m.update()
+
+    # one and only one clause for extra literals is true -- (23)
+    m.addConstr(quicksum(b_minimal_element_vars[e] for e in minimal_element) == 1)
+
     # focus on label
     for element in poset:
         self_loop_label = pruned_subgraph.nodes[element2edge[element][0]]['label']
         edge_label = pruned_subgraph.edges[element2edge[element]]['label']
 
-        edge_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, element, self_loop_label,
-                         edge_label, poset_relation, element_component_clause_literal_node, type_num, M, epsilon,
-                         buchi, incomparable_element)
+        edge_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, b_minimal_element_vars, element,
+                         self_loop_label, edge_label, poset_relation, element_component_clause_literal_node, type_num,
+                         M, epsilon, buchi, incomparable_element, minimal_element, final_element_type_robot_node)
 
         if self_loop_label and self_loop_label != '1':
-            self_loop_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, element, self_loop_label,
-                                  incomparable_element, poset_relation, element_component_clause_literal_node, type_num,
-                                  M, buchi)
-
-    # return to the same region obtained in the prefix part to close the loop
-    if exe_robot_next_vertex_pre:  # postive literals exist
-        c = list(exe_robot_next_vertex_pre.keys())[0][0]
-        for element in poset:
-            if ('artificial', 'next_artificial') == element2edge[element]:
-                # the same clause in the vertex of next_vertex should be satisfied
-                m.addConstr(c_vars[(element, 0, c)] == 1)
-
-                self_loop_label = pruned_subgraph.nodes[element2edge[element][0]]['label']
-                # the same set of robots satisfy the literal as in the prefix part
-                for l in range(len(self_loop_label[c])):
-                    # only consider literals with zero indicator, since non-zero indicator
-                    # has been consdiered by the same robot constraint (22)
-                    if self_loop_label[c][l][3] == 0:
-                        nodes = element_component_clause_literal_node[(element, 0, c, l)]
-                        for index, i in enumerate(nodes):
-                            k = exe_robot_next_vertex_pre[(c, l)][index][1]
-                            m.addConstr(quicksum(x_vars[(p, i, k)] for p in ts.predecessors(i)) == 1)
-                break
+            self_loop_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, b_minimal_element_vars,
+                                  element, self_loop_label, incomparable_element, poset_relation,
+                                  element_component_clause_literal_node, type_num, M, buchi)
 
     expr = LinExpr([0.7 * ts.edges[tuple(index[:2])]['weight'] for index in x_vars.keys()], list(x_vars.values()))
     expr.add(LinExpr([0.3] * len([key for key in t_edge_vars.keys()]),
@@ -142,7 +139,7 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
     else:
         print('Optimization ended with status %d' % m.status)
     if m.status != GRB.Status.OPTIMAL:
-        return None, None, None, None, None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None
 
     goal = 0
     for index in x_vars.keys():
@@ -160,12 +157,13 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
         = get_waypoint(x_vars, t_vars, ts, init_type_robot_node, time_axis)
 
     # extract the run
-    acpt_run, exe_robot_next_vertex, essential_clause_next_vertex, neg_clause_next_vertex = run(pruned_subgraph, time_axis, init_state, element2edge,
-                                          {'x': x_vars, 'c': c_vars, 't': t_edge_vars},
-                                          element_component_clause_literal_node, ts, type_num, is_nonempty_self_loop)
+    acpt_run= run(pruned_subgraph, time_axis, init_state, element2edge,
+                  {'x': x_vars, 'c': c_vars, 't': t_edge_vars},
+                  element_component_clause_literal_node, ts, type_num, is_nonempty_self_loop,
+                  type_robot_label)
 
     return robot_waypoint_pre, robot_time_pre, id2robots, robot_label_pre, robot_waypoint_axis, robot_time_axis, \
-           time_axis, acpt_run, exe_robot_next_vertex, essential_clause_next_vertex, neg_clause_next_vertex
+           time_axis, acpt_run
 
 
 def create_variables(m, ts, poset, pruned_subgraph, element2edge, type_num, minimal_element):
@@ -220,12 +218,12 @@ def create_variables(m, ts, poset, pruned_subgraph, element2edge, type_num, mini
     m.update()
 
     # binary variables for extral literals pi_init
-    b_minimal_elment_vars = {}
+    b_minimal_element_vars = {}
     for element in minimal_element:
-        b_minimal_elment_vars.update(m.addVar([element], vtype=GRB.BINARY))
+        b_minimal_element_vars.update(m.addVars([element], vtype=GRB.BINARY))
     m.update()
 
-    return x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, b_minimal_elment_vars
+    return x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, b_minimal_element_vars
 
 
 def initial_constraints(m, x_vars, t_vars, ts, init_type_robot_node, type_num):
@@ -242,7 +240,8 @@ def initial_constraints(m, x_vars, t_vars, ts, init_type_robot_node, type_num):
     m.update()
 
 
-def one_clause_true(m, c_vars, element, component, label, poset_relation, incomparable_element, buchi):
+def one_clause_true(m, c_vars, b_minimal_element_vars, element, component, label, poset_relation, incomparable_element,
+                    buchi, minimal_element):
     """
     only one clause is true
     """
@@ -253,7 +252,13 @@ def one_clause_true(m, c_vars, element, component, label, poset_relation, incomp
         m.addConstr(quicksum(c_vars[(element, component, c)] for c in range(len(label))) == 0)
         m.update()
         return
-    m.addConstr(quicksum(c_vars[(element, component, c)] for c in range(len(label))) == 1)
+    # treat the extra literal as the regular clause
+    if component == 1 and element in minimal_element:
+        m.addConstr(quicksum([c_vars[(element, component, c)] for c in range(len(label))]
+                             + [b_minimal_element_vars[element]]) == 1)
+    # vertex label and edge label (not minimal element)
+    else:
+        m.addConstr(quicksum(c_vars[(element, component, c)] for c in range(len(label))) == 1)
     m.update()
 
 
@@ -320,13 +325,14 @@ def network_schedule_constraints(m, ts, x_vars, t_vars, init_type_robot_node, in
     m.update()
 
 
-def edge_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, element, self_loop_label, edge_label,
-                     poset_relation, element_component_clause_literal_node, type_num, M, epsilon, buchi,
-                     incomparable_element):
+def edge_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, b_minimal_element_vars, element,
+                     self_loop_label, edge_label, poset_relation, element_component_clause_literal_node, type_num,
+                     M, epsilon, buchi, incomparable_element, minimal_element, final_element_type_robot_node):
     # one and only one clause is true -- eq (9)
     if edge_label != '1':
 
-        one_clause_true(m, c_vars, element, 1, edge_label, poset_relation, incomparable_element, buchi)
+        one_clause_true(m, c_vars, b_minimal_element_vars, element, 1, edge_label, poset_relation, incomparable_element,
+                        buchi, minimal_element)
 
         for c in range(len(edge_label)):
             # the nodes corresponding to each clause
@@ -345,6 +351,28 @@ def edge_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars,
                         type_num[ts.nodes[clause_nodes[0][0]]['location_type_component_element'][1]])) ==
                                 quicksum(t_vars[(i, k, 1)] for k in
                                          range(type_num[ts.nodes[i]['location_type_component_element'][1]])))
+
+    if element in minimal_element:
+        # vertices for extra literal are visited at the same time no matter edge label is 1 or not -- eq (11)
+        clause_nodes = list(final_element_type_robot_node[element].values())
+        for i in clause_nodes:
+            m.addConstr(quicksum(t_vars[(clause_nodes[0], k, 1)]
+                                 for k in range(type_num[ts.nodes[clause_nodes[0]]['location_type_component_element'][1]])) ==
+                        quicksum(t_vars[(i, k, 1)] for k in
+                                 range(type_num[ts.nodes[i]['location_type_component_element'][1]])))
+
+        # the extra literal of the last subtask is one -- (24)
+        z = len(minimal_element) - 1
+        m.addConstr(1 + M * (quicksum(b_element_vars[(element, o)] for o in minimal_element if o != element) - z)
+                    <= b_minimal_element_vars[element])
+        m.addConstr(b_minimal_element_vars[element] <= 1 + M * (z - quicksum(b_element_vars[(element, o)]
+                                                                       for o in minimal_element if o != element)))
+
+        # if the extra literal is one, all robots return to initial locations -- (25)
+        expr_literal = quicksum(
+            x_vars[(p, i, type_robot[1])] for type_robot, i in final_element_type_robot_node[element].items()
+            for p in ts.predecessors(i))
+        m.addConstr(expr_literal / len(final_element_type_robot_node[element]) == b_minimal_element_vars[element])
 
     # timing constraints between a node and its outgoing edge -- eq (16)
     strict_incmp = [order[0] for order in poset_relation if order[1] == element] + incomparable_element[element]
@@ -385,11 +413,12 @@ def edge_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars,
     m.update()
 
 
-def self_loop_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, element, self_loop_label,
-                          incomparable_element, poset_relation, element_component_clause_literal_node, type_num, M,
-                          buchi):
+def self_loop_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, b_minimal_element_vars, element,
+                          self_loop_label, incomparable_element, poset_relation, element_component_clause_literal_node,
+                          type_num, M,  buchi):
     # one and only one clause is true, -- eq (9)
-    one_clause_true(m, c_vars, element, 0, self_loop_label, poset_relation, incomparable_element, buchi)
+    one_clause_true(m, c_vars, b_minimal_element_vars, element, 0, self_loop_label, poset_relation, incomparable_element
+                    , buchi, [])
 
     for c in range(len(self_loop_label)):
         # the nodes corresponding to each clause

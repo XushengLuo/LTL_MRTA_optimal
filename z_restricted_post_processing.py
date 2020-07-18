@@ -11,7 +11,7 @@ def isEquivalent(expr1, expr2):
 
 # ------------- get accepted runs using the waypoint only ----------------
 def run(graph, time_axis, initial, element2edge, var, element_component_clause_literal_node, ts, type_num,
-        is_nonempty_self_loop):
+        is_nonempty_self_loop, type_robot_label):
     """
     the accepting run incurred by the path
     """
@@ -19,6 +19,7 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
     frontier = [[initial, -1, []]]
     # iterate until the accepting state is reached
     while True:
+        print([f[0] for f in frontier])
         node, clock, acpt_run_ = frontier.pop()
 
         # Determine the set of identical time instants
@@ -50,12 +51,13 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
                 essential_clause_edge, neg_clause_edge, exe_robots_edge \
                     = determine_essentials(instant_element, var, graph.edges[(node, succ)]['label'],
                                            graph.edges[(node, succ)]['neg_label'], 1,
-                                           element_component_clause_literal_node, ts, type_num)
+                                           element_component_clause_literal_node, ts, type_num,
+                                           type_robot_label)
 
                 essential_clause_vertex, neg_clause_vertex, exe_robots_vertex \
                     = determine_essentials(instant_element, var, graph.nodes[node]['label'],
                                            graph.nodes[node]['neg_label'], 0,
-                                           element_component_clause_literal_node, ts, type_num,
+                                           element_component_clause_literal_node, ts, type_num, dict(),
                                            pre_essential_clause_edge, essential_clause_edge)
 
                 # clock, the exact time when transition occurs
@@ -76,7 +78,8 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
 
 
 def determine_essentials(instant_element, var, label, neg_label, component,
-                         element_component_clause_literal_node, ts, type_num, pre_complete_clause_formula=[],
+                         element_component_clause_literal_node, ts, type_num, type_robot_label,
+                         pre_complete_clause_formula=[],
                          cur_complete_clause_formula=[]):
     """
     determine the essential clause and the essential robots
@@ -106,14 +109,20 @@ def determine_essentials(instant_element, var, label, neg_label, component,
                     essential_clause = clause
                     neg_clause = neg_label[c]
                     break
+            if essential_clause:
+                exe_robots = {lit[0]: [] for lit in essential_clause}
+                for l, lit in enumerate(essential_clause):
+                    for i in element_component_clause_literal_node[(instant_element[1], component, c, l)]:
+                        for k in range(type_num[ts.nodes[i]['location_type_component_element'][1]]):
+                            if sum([round(var['x'][(p, i, k)].x) for p in ts.predecessors(i)]) == 1:
+                                exe_robots[lit[0]].append((lit[1], k))
+                                break
+            # extra literal
+            else:
+                essential_clause = []
+                neg_clause = []
+                exe_robots = {label: [type_robot] for type_robot, label in type_robot_label.items()}
 
-            exe_robots = {lit[0]: [] for lit in essential_clause}
-            for l, lit in enumerate(essential_clause):
-                for i in element_component_clause_literal_node[(instant_element[1], component, c, l)]:
-                    for k in range(type_num[ts.nodes[i]['location_type_component_element'][1]]):
-                        if sum([round(var['x'][(p, i, k)].x) for p in ts.predecessors(i)]) == 1:
-                            exe_robots[lit[0]].append((lit[1], k))
-                            break
         # empty label
         else:
             return False, [], dict()

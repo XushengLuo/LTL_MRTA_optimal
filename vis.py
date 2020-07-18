@@ -86,7 +86,10 @@ def plot_workspace_helper(ax, obj, obj_label):
     plt.rc('font', family='serif')
     plt.gca().set_aspect('equal', adjustable='box')
     for key in obj:
-        color = 'b' if obj_label != 'region' else 'c'
+        if 'r' in key:
+            continue
+        color = 'k' if obj_label != 'region' else 'gray'
+        alpha = 0.9 if obj_label != 'region' else 0.4
         for grid in obj[key]:
             x_ = grid[0]
             y_ = grid[1]
@@ -98,7 +101,7 @@ def plot_workspace_helper(ax, obj, obj_label):
                 y.append(point[1])
             polygon = Polygon(np.column_stack((x, y)), True)
             patches.append(polygon)
-            p = PatchCollection(patches, facecolors=color, edgecolors=color, alpha=0.4)
+            p = PatchCollection(patches, facecolors=color, edgecolors=color, alpha=alpha)
             ax.add_collection(p)
         ax.text(np.mean(x) - 0.2, np.mean(y) - 0.2, r'${}_{{{}}}$'.format(key[0], key[1:]), fontsize=12)
 
@@ -130,7 +133,8 @@ def animate(i, ax, particles, annots, cls_robot_path, time_template, time_text, 
 
 def vis(workspace, robot_path, robot_pre_suf_time, ap):
     num_type = len(workspace.type_num.keys())
-    color = np.linspace(0.9, 0.1, num_type)
+    # color = np.linspace(0.9, 0.1, num_type)
+    color = [0.4, 0.6]
     x = list((value[0]+0.5, value[1]+0.5) for value in workspace.type_robot_location.values())
     color = [color[i[0]-1] for i in robot_path.keys()]
 

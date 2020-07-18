@@ -107,7 +107,7 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
     else:
         print('Optimization ended with status %d' % m.status)
     if m.status != GRB.Status.OPTIMAL:
-        return None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None
 
     goal = 0
     for index in x_vars.keys():
@@ -126,7 +126,7 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
 
     # extract the run
     acpt_run = run(pruned_subgraph, time_axis, init_state, element2edge, {'x': x_vars, 'c': c_vars, 't': t_edge_vars},
-                    element_component_clause_literal_node, ts, type_num, is_nonempty_self_loop)
+                    element_component_clause_literal_node, ts, type_num, is_nonempty_self_loop, dict())
 
     return robot_waypoint_pre, robot_time_pre, id2robots, robot_label_pre, robot_waypoint_axis, robot_time_axis, \
            time_axis, acpt_run

@@ -391,6 +391,7 @@ def update_robot_env(workspace, robot_team_initial_target, robot_move, robot_way
             min_length = np.inf
             path = []
             min_target = None
+
             for target in workspace.regions[robot_waypoint[robot][robot_progress[robot] + 1]]:
                 length, p = nx.algorithms.single_source_dijkstra(workspace.graph_workspace,
                                                                  source=robot_path[robot][-1],
