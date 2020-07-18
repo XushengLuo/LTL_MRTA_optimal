@@ -119,6 +119,17 @@ class Workspace(object):
                 p2p[(key_init[r1], key_region[l1])] = length
                 p2p_path[(key_init[r1], key_region[l1])] = path
                 p2p[(key_region[l1], key_init[r1])] = length
+
+        for r1 in range(len(self.label_location)):
+            for r2 in range(r1, len(self.label_location)):
+                length, path = nx.algorithms.single_source_dijkstra(self.graph_workspace,
+                                                                    source=self.label_location[key_init[r1]],
+                                                                    target=self.label_location[key_init[r2]])
+                p2p[(key_init[r1], key_init[r2])] = length
+                p2p_path[(key_init[r1], key_init[r2])] = path
+                p2p[(key_init[r2], key_init[r1])] = length
+                p2p_path[(key_init[r2], key_init[r1])] = path
+
         return p2p, p2p_path
 
     def plot_workspace(self):

@@ -6,8 +6,9 @@ import z_restricted_poset
 from workspace_dars import Workspace
 import matplotlib.pyplot as plt
 import z_restricted_weighted_ts
+import z_restricted_weighted_ts_suffix
 import z_restricted_milp
-import milp_suf
+import z_restricted_milp_suf
 import pickle
 from vis import plot_workspace
 import numpy
@@ -183,6 +184,11 @@ def ltl_mrta(formula):
                 if not pruned_subgraph:
                     continue
 
+                buchi.implication_check(pruned_subgraph, paths)
+                # no paths due to the implication does not hold
+                if not paths:
+                    continue
+
                 edge2element, element2edge = buchi.get_element(pruned_subgraph)
 
                 element_component2label = buchi.element2label2eccl(element2edge, pruned_subgraph)
@@ -190,103 +196,105 @@ def ltl_mrta(formula):
                 hasse_graphs = buchi.map_path_to_element_sequence(edge2element, paths)
 
                 for _, poset_relation, pos, hasse_diagram in hasse_graphs:
+
                     robot2eccl = z_restricted_poset.element2robot2eccl(pos, element2edge, pruned_subgraph)
 
                     incomparable_element, larger_element = z_restricted_poset.incomparable_larger(pos, hasse_diagram,
                                                                                                   pruned_subgraph,
                                                                                                   element2edge)
-
                     # --------------- construct the routing graph ---------------
+                    minimal_element = [node for node in hasse_diagram.nodes() if hasse_diagram.out_degree(node) == 0]
+                    init_type_robot_node, element_component_clause_literal_node, node_location_type_component_element, \
+                    num_nodes, final_element_type_robot_node = z_restricted_weighted_ts_suffix.construct_node_set(pos,
+                                                                                                                  element2edge,
+                                                                                                                  pruned_subgraph,
+                                                                                                                  workspace.type_robot_label,
+                                                                                                                  minimal_element)
 
-                    init_type_robot_node, element_component_clause_literal_node, node_location_type_component_element, num_nodes = \
-                        weighted_ts.construct_node_set(pos, element2edge, pruned_subgraph,
-                                                       workspace.type_robot_label)
-                    #
-                    #         edge_set = weighted_ts.construct_edge_set(pos, element_component_clause_literal_node,
-                    #                                                   element2edge, pruned_subgraph,
-                    #                                                   element_component2label,
-                    #                                                   init_type_robot_node, incomparable_element,
-                    #                                                   larger_element)
-                    #
-                    #         ts = weighted_ts.construct_graph(num_nodes, node_location_type_component_element, edge_set,
-                    #                                          workspace.p2p)
-                    #
-                    #         # --------------------- MILP -------------------------
-                    #         init_state = next_vertex
-                    #         robot_waypoint_suf, robot_time_suf, _, robot_label_suf, robot_waypoint_axis, robot_time_axis, \
-                    #         time_axis, acpt_run, exe_robot_next_vertex_suf, essential_clause_next_vertex_suf, \
-                    #         neg_clause_next_vertex_suf = milp_suf.construct_milp_constraint(ts,
-                    #                                                                         workspace.type_num,
-                    #                                                                         pos,
-                    #                                                                         pruned_subgraph,
-                    #                                                                         element2edge,
-                    #                                                                         element_component_clause_literal_node,
-                    #                                                                         poset_relation,
-                    #                                                                         init_type_robot_node,
-                    #                                                                         incomparable_element,
-                    #                                                                         larger_element,
-                    #                                                                         robot2eccl,
-                    #                                                                         id2robots,
-                    #                                                                         init_state,
-                    #                                                                         buchi,
-                    #                                                                         is_nonempty_self_loop,
-                    #                                                                         exe_robot_next_vertex_pre)
-                    #         if not robot_waypoint_suf:
-                    #             continue
-                    #
-                    #         for robot, time in list(robot_time_suf.items()):
-                    #             # delete such robots that did not participate (the initial location of robots may just satisfies)
-                    #             if time[-1] == 0 and len(time) == 1:
-                    #                 del robot_time_suf[robot]
-                    #                 del robot_waypoint_suf[robot]
-                    #
-                    #         print('----------------------------------------------')
-                    #         for type_robot, waypoint in robot_waypoint_suf.items():
-                    #             print(type_robot, " : ", waypoint)
-                    #             print(type_robot, " : ", robot_time_suf[type_robot])
-                    #             print(type_robot, " : ", robot_label_suf[type_robot])
-                    #         print('----------------------------------------------')
-                    #
-                    #         print('time axis: ', time_axis)
-                    #
-                    #         for robot, time in list(robot_time_axis.items()):
-                    #             # delete such robots that did not participate (the initial location of robots may just satisfies)
-                    #             if not time:
-                    #                 del robot_time_axis[robot]
-                    #                 del robot_waypoint_axis[robot]
-                    #
-                    #         for type_robot, waypoint in robot_waypoint_axis.items():
-                    #             print(type_robot, " : ", waypoint)
-                    #             print(type_robot, " : ", robot_time_axis[type_robot])
-                    #
-                    #         print('----------------------------------------------')
-                    #
-                    #         for stage in acpt_run:
-                    #             print(stage)
-                    #         print('----------------------------------------------')
-                    #
-                    #         robot_path_suf = mapp(workspace, buchi, acpt_run, robot_waypoint_axis, robot_time_axis,
-                    #                               is_nonempty_self_loop,
-                    #                               'simultaneous')
-                    #
-                    #         end = datetime.now()
-                    #         print('total time for the prefix + suffix parts: {0}'.format((end - start).total_seconds()))
-                    #
-                    #         robot_path_loop = mapp_for_loop(exe_robot_next_vertex_pre,
-                    #                                         {robot: path[0] for robot, path in robot_path_suf.items()},
-                    #                                         {robot: path[-1] for robot, path in robot_path_suf.items()},
-                    #                                         essential_clause_next_vertex_pre, neg_clause_next_vertex_pre,
-                    #                                         workspace)
-                    #         robot_path = {robot: path + robot_path_suf[robot][1:] + robot_path_loop[robot][1:] +
-                    #                              robot_path_suf[robot][1:] + robot_path_loop[robot][1:] for
-                    #                       robot, path in robot_path_pre.items()}
-                    #
-                    #         print_red_on_cyan(task.formula)
-                    #         print_red_on_cyan(
-                    #             'A path is found for the case where the accepting state does not have a self-loop')
-                    #         vis(workspace, robot_path, {robot: [len(path)] * 2 for robot, path in robot_path.items()}, [])
-                    #
-                    #         return
+                    edge_set = z_restricted_weighted_ts_suffix.construct_edge_set(pos,
+                                                                                  element_component_clause_literal_node,
+                                                                                  element2edge, pruned_subgraph,
+                                                                                  element_component2label,
+                                                                                  init_type_robot_node,
+                                                                                  incomparable_element,
+                                                                                  larger_element, minimal_element,
+                                                                                  final_element_type_robot_node)
+
+                    ts = z_restricted_weighted_ts_suffix.construct_graph(num_nodes,
+                                                                         node_location_type_component_element, edge_set,
+                                                                         workspace.p2p)
+
+                    # --------------------- MILP -------------------------
+                    robot_waypoint_suf, robot_time_suf, _, robot_label_suf, robot_waypoint_axis, robot_time_axis, \
+                    time_axis, acpt_run, exe_robot_next_vertex_suf, essential_clause_next_vertex_suf, \
+                    neg_clause_next_vertex_suf \
+                        = z_restricted_milp_suf.construct_milp_constraint(ts,
+                                                                          workspace.type_num,
+                                                                          pos,
+                                                                          pruned_subgraph,
+                                                                          element2edge,
+                                                                          element_component_clause_literal_node,
+                                                                          poset_relation,
+                                                                          init_type_robot_node,
+                                                                          incomparable_element,
+                                                                          larger_element,
+                                                                          robot2eccl,
+                                                                          id2robots,
+                                                                          init_state,
+                                                                          buchi,
+                                                                          is_nonempty_self_loop,
+                                                                          minimal_element,
+                                                                          final_element_type_robot_node)
+                    if not robot_waypoint_suf:
+                        continue
+
+                    for robot, time in list(robot_time_suf.items()):
+                        # delete such robots that did not participate (the initial location of robots may just satisfies)
+                        if time[-1] == 0 and len(time) == 1:
+                            del robot_time_suf[robot]
+                            del robot_waypoint_suf[robot]
+
+                    print('----------------------------------------------')
+                    for type_robot, waypoint in robot_waypoint_suf.items():
+                        print(type_robot, " : ", waypoint)
+                        print(type_robot, " : ", robot_time_suf[type_robot])
+                        print(type_robot, " : ", robot_label_suf[type_robot])
+                    print('----------------------------------------------')
+
+                    print('time axis: ', time_axis)
+
+                    for robot, time in list(robot_time_axis.items()):
+                        # delete such robots that did not participate (the initial location of robots may just satisfies)
+                        if not time:
+                            del robot_time_axis[robot]
+                            del robot_waypoint_axis[robot]
+
+                    for type_robot, waypoint in robot_waypoint_axis.items():
+                        print(type_robot, " : ", waypoint)
+                        print(type_robot, " : ", robot_time_axis[type_robot])
+
+                    print('----------------------------------------------')
+
+                    for stage in acpt_run:
+                        print(stage)
+                    print('----------------------------------------------')
+
+                    robot_path_suf = mapp(workspace, buchi, acpt_run, robot_waypoint_axis, robot_time_axis,
+                                          is_nonempty_self_loop,
+                                          'simultaneous')
+
+                    end = datetime.now()
+                    print('total time for the prefix + suffix parts: {0}'.format((end - start).total_seconds()))
+
+                    robot_path = {robot: path + robot_path_suf[robot][1:] + robot_path_suf[robot][1:] for
+                                  robot, path in robot_path_pre.items()}
+
+                    print_red_on_cyan(task.formula)
+                    print_red_on_cyan(
+                        'A path is found for the case where the accepting state does not have a self-loop')
+                    vis(workspace, robot_path, {robot: [len(path)] * 2 for robot, path in robot_path.items()}, [])
+
+                    return
 
 
 if __name__ == '__main__':

@@ -725,3 +725,66 @@ class Buchi(object):
         #     except KeyError:
         #         continue
         # return in_between
+
+    def implication_check(self, pruned_subgraph, paths):
+        """
+        check whether the final locations of the prefix part
+        satisfy the edge (prior, accept) and vertex prior
+        :return:
+        """
+        i = 0
+        while i < len(paths):
+            path_label = pruned_subgraph.edges[tuple(paths[i][-2:])]['label']
+            path_neg_label = pruned_subgraph.edges[tuple(paths[i][-2:])]['neg_label']
+
+            prior_label = pruned_subgraph.nodes[paths[i][-2]]['label']
+            prior_neg_label = pruned_subgraph.nodes[paths[i][-2]]['neg_label']
+
+            if self.ap_sat_label(path_label, path_neg_label) and \
+                    self.ap_sat_label(prior_label, prior_neg_label):
+                i += 1
+            else:
+                del paths[i]
+
+
+    # def implication_check_helper(self, label, neg_label, path_label, path_neg_label):
+    #
+    #
+    #
+    #     for clause in label:
+    #         is_clause = True
+    #         # the label of the last edge is true
+    #         if path_label == '1':
+    #             if
+    #
+    #             for index, path_neg_clause in enumerate(path_neg_label):
+    #                 if .__contains__(set(path_neg_clause))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
