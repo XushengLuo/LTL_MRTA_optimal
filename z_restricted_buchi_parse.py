@@ -639,17 +639,16 @@ class Buchi(object):
         # remove the edge following ID and ST properties
         removed_edge = []
         for node in subgraph.nodes():
-            if subgraph.nodes[node]['formula'] == to_dnf('1'):
-                for succ in subgraph.succ[node]:
-                    if subgraph.nodes[succ]['formula'] == to_dnf('1'):
-                        for next_succ in subgraph.succ[succ]:
-                            try:
-                                if subgraph.edges[(node, next_succ)]['formula'] == \
-                                              And(self.buchi_graph.edges[(node, succ)]['formula'],
-                                                  self.buchi_graph.edges[(succ, next_succ)]['formula']):
-                                    removed_edge.append((node, next_succ))
-                            except KeyError:
-                                continue
+            for succ in subgraph.succ[node]:
+                if subgraph.nodes[node]['formula'] == subgraph.nodes[succ]['formula']:
+                    for next_succ in subgraph.succ[succ]:
+                        try:
+                            if subgraph.edges[(node, next_succ)]['formula'] == \
+                                    And(self.buchi_graph.edges[(node, succ)]['formula'],
+                                        self.buchi_graph.edges[(succ, next_succ)]['formula']):
+                                removed_edge.append((node, next_succ))
+                        except KeyError:
+                            continue
         subgraph.remove_edges_from(removed_edge)
 
     def prune_subgraph(self, subgraph):
@@ -745,28 +744,6 @@ class Buchi(object):
                 i += 1
             else:
                 del paths[i]
-
-
-    # def implication_check_helper(self, label, neg_label, path_label, path_neg_label):
-    #
-    #
-    #
-    #     for clause in label:
-    #         is_clause = True
-    #         # the label of the last edge is true
-    #         if path_label == '1':
-    #             if
-    #
-    #             for index, path_neg_clause in enumerate(path_neg_label):
-    #                 if .__contains__(set(path_neg_clause))
-
-
-
-
-
-
-
-
 
 
 

@@ -21,10 +21,10 @@ class Workspace(object):
         # self.length = int(sys.argv[1])
         # self.width = int(sys.argv[1])
         # n = int(sys.argv[2])
-        self.length = 8    # length
-        self.width = 8    # width
+        self.length = 10   # length
+        self.width = 10   # width
         # n = 4
-        self.type_num = {1: 3, 2: 2}   # single-task robot
+        self.type_num = {1: 4, 2: 4}   # single-task robot
         self.workspace = (self.length, self.width)
         self.num_of_regions = 10
         self.num_of_obstacles = 10
@@ -43,20 +43,6 @@ class Workspace(object):
         self.build_graph()
 
         self.p2p = self.point_to_point_path()  # label2label path
-
-    # def initialize(self):
-    #     type_robot_location = dict()
-    #     x0 = self.regions['l1'].copy()
-    #     # x0.remove((1, 4))
-    #     for robot_type in self.type_num.keys():
-    #         for num in range(self.type_num[robot_type]):
-    #             while True:
-    #                 candidate = random.sample(x0, 1)[0]
-    #                 if candidate not in type_robot_location.values():
-    #                     type_robot_location[(robot_type, num)] = candidate
-    #                     x0.remove(candidate)
-    #                     break
-    #     return type_robot_location
 
     def reachable(self, location, obstacles):
         next_location = []
@@ -189,78 +175,92 @@ class Workspace(object):
 
             plt.savefig('img/path.png', bbox_inches='tight', dpi=600)
 
-    # def allocate_region_dars(self):
-    #     # (x, y) --> (y-1, 30-x)
-    #     # dars
-    #     # regions = []
-    #     # regions.append(list(itertools.product(range(0, 6), range(0, 17))))  # x0 l1
-    #     # regions.append(list(itertools.product(range(0, 11), range(19, 30))))  # b1 l2
-    #     # regions.append(list(itertools.product(range(18, 30), range(16, 30))))  # b2 l3
-    #     # regions.append(list(itertools.product(range(18, 30), range(0, 14))))  # b3 l4
-    #     # regions.append(list(itertools.product(range(16, 18), range(0, 3))))  # g1 l5
-    #     # regions.append(list(itertools.product(range(18, 21), range(14, 16))))  # g1 l6
-    #
-    #     # small regions
-    #     # regions = []
-    #     # regions.append(list(itertools.product(range(0, 5), range(0, 5))))  # x0
-    #     # regions.append(list(itertools.product(range(0, 5), range(25, 30))))  # b1
-    #     # regions.append(list(itertools.product(range(25, 30), range(25, 30))))  # b2
-    #     # regions.append(list(itertools.product(range(25, 30), range(0, 5))))  # b3
-    #
-    #     # # small workspace
-    #     regions = []
-    #     regions.append(list(itertools.product(range(0, 2), range(0, 5))))  # x0 l1
-    #     regions.append(list(itertools.product(range(0, 3), range(8, 10))))  # b1 l2
-    #     regions.append(list(itertools.product(range(8, 10), range(7, 10))))  # b2 l3
-    #     regions.append(list(itertools.product(range(8, 10), range(0, 2))))  # b3 l4
-    #     regions.append(list(itertools.product(range(5, 6), range(0, 2))))  # g1 l5
-    #     regions.append(list(itertools.product(range(6, 8), range(4, 5))))  # g2 l6
-    #
-    #     return regions
-    #
-    # def allocate_obstacle_dars(self):
-    #     # 30 by 30
-    #     # obstacles = []
-    #     # obstacles.append(list(itertools.product(range(0, 8), range(17, 19))))  # o1
-    #     # obstacles.append(list(itertools.product(range(6, 8), range(0, 12))))
-    #     # obstacles.append(list(itertools.product(range(11, 13), range(18, 30))))  # o2
-    #     # obstacles.append(list(itertools.product(range(16, 18), range(3, 27))))  # o3
-    #     # obstacles.append(list(itertools.product(range(21, 30), range(14, 16))))  # o4
-    #
-    #     # small workspace
-    #     obstacles = []
-    #     obstacles.append(list(itertools.product(range(0, 2), range(5, 6))))  # o1
-    #     # obstacles.append(list(itertools.product(range(2, 2), range(0, 4))))  #
-    #     obstacles.append(list(itertools.product(range(3, 4), range(7, 10))))  # o2
-    #     obstacles.append(list(itertools.product(range(5, 6), range(2, 8))))  # o3
-    #     obstacles.append(list(itertools.product(range(8, 10), range(4, 5))))  # o4
-    #
-    #     return obstacles
+    def initialize(self):
+        type_robot_location = dict()
+        x0 = self.regions['l1'].copy()
+        # x0.remove((1, 4))
+        for robot_type in self.type_num.keys():
+            for num in range(self.type_num[robot_type]):
+                while True:
+                    candidate = random.sample(x0, 1)[0]
+                    if candidate not in type_robot_location.values():
+                        type_robot_location[(robot_type, num)] = candidate
+                        x0.remove(candidate)
+                        break
+        return type_robot_location
 
     def allocate_region_dars(self):
         # (x, y) --> (y-1, 30-x)
-        # ijrr
+        # dars
+        # regions = []
+        # regions.append(list(itertools.product(range(0, 6), range(0, 17))))  # x0 l1
+        # regions.append(list(itertools.product(range(0, 11), range(19, 30))))  # b1 l2
+        # regions.append(list(itertools.product(range(18, 30), range(16, 30))))  # b2 l3
+        # regions.append(list(itertools.product(range(18, 30), range(0, 14))))  # b3 l4
+        # regions.append(list(itertools.product(range(16, 18), range(0, 3))))  # g1 l5
+        # regions.append(list(itertools.product(range(18, 21), range(14, 16))))  # g1 l6
+
+        # small regions
+        # regions = []
+        # regions.append(list(itertools.product(range(0, 5), range(0, 5))))  # x0
+        # regions.append(list(itertools.product(range(0, 5), range(25, 30))))  # b1
+        # regions.append(list(itertools.product(range(25, 30), range(25, 30))))  # b2
+        # regions.append(list(itertools.product(range(25, 30), range(0, 5))))  # b3
+
         # # small workspace
         regions = []
-        regions.append(list(itertools.product(range(5, 8), range(0, 2))))  # x0 l1
-        regions.append(list(itertools.product(range(6, 8), range(5, 8))) + [(7,4)])  # b1 l2
-        regions.append(list(itertools.product(range(0, 2), range(0, 4))))  # b2 l3
-        regions.append(list(itertools.product(range(0, 3), range(6, 7))))  # b3 l4
+        regions.append(list(itertools.product(range(0, 2), range(0, 5))))  # x0 l1
+        regions.append(list(itertools.product(range(0, 3), range(8, 10))))  # b1 l2
+        regions.append(list(itertools.product(range(8, 10), range(7, 10))))  # b2 l3
+        regions.append(list(itertools.product(range(8, 10), range(0, 2))))  # b3 l4
+        regions.append(list(itertools.product(range(5, 6), range(0, 2))))  # g1 l5
+        regions.append(list(itertools.product(range(6, 8), range(4, 5))))  # g2 l6
+
         return regions
 
     def allocate_obstacle_dars(self):
+        # 30 by 30
+        # obstacles = []
+        # obstacles.append(list(itertools.product(range(0, 8), range(17, 19))))  # o1
+        # obstacles.append(list(itertools.product(range(6, 8), range(0, 12))))
+        # obstacles.append(list(itertools.product(range(11, 13), range(18, 30))))  # o2
+        # obstacles.append(list(itertools.product(range(16, 18), range(3, 27))))  # o3
+        # obstacles.append(list(itertools.product(range(21, 30), range(14, 16))))  # o4
 
         # small workspace
         obstacles = []
-        # obstacles.append(list(itertools.product(range(3, 4), range(2, 6))) + [(4, 2)])  # o1
-        obstacles.append(list(itertools.product(range(3, 4), range(0, 6))))  # o1
+        obstacles.append(list(itertools.product(range(0, 2), range(5, 6))))  # o1
+        # obstacles.append(list(itertools.product(range(2, 2), range(0, 4))))  #
+        obstacles.append(list(itertools.product(range(3, 4), range(7, 10))))  # o2
+        obstacles.append(list(itertools.product(range(5, 6), range(2, 8))))  # o3
+        obstacles.append(list(itertools.product(range(8, 10), range(4, 5))))  # o4
 
         return obstacles
 
-    def initialize(self):
-        type_robot_location = {(1, 0): (6, 0), (1, 1): (6, 1), (1, 2): (7, 1),
-                               (2, 0): (5, 0), (2, 1): (5, 1)}
-        return type_robot_location
+    # def allocate_region_dars(self):
+    #     # (x, y) --> (y-1, 30-x)
+    #     # ijrr
+    #     # # small workspace
+    #     regions = []
+    #     regions.append(list(itertools.product(range(5, 8), range(0, 2))))  # x0 l1
+    #     regions.append(list(itertools.product(range(6, 8), range(5, 8))) + [(7,4)])  # b1 l2
+    #     regions.append(list(itertools.product(range(0, 2), range(0, 4))))  # b2 l3
+    #     regions.append(list(itertools.product(range(0, 3), range(6, 7))))  # b3 l4
+    #     return regions
+    #
+    # def allocate_obstacle_dars(self):
+    #
+    #     # small workspace
+    #     obstacles = []
+    #     # obstacles.append(list(itertools.product(range(3, 4), range(2, 6))) + [(4, 2)])  # o1
+    #     obstacles.append(list(itertools.product(range(3, 4), range(0, 6))))  # o1
+    #
+    #     return obstacles
+    #
+    # def initialize(self):
+    #     type_robot_location = {(1, 0): (6, 0), (1, 1): (6, 1), (1, 2): (7, 1),
+    #                            (2, 0): (5, 0), (2, 1): (5, 1)}
+    #     return type_robot_location
 
     def update_after_prefix(self):
         # region and corresponding locations

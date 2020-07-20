@@ -14,7 +14,7 @@ from vis import plot_workspace
 import numpy
 from post_processing import run
 # from MAPP_heuristic import mapp
-from z_restricted_GMAPP import mapp
+from z_restricted_GMAPP import mapp, compute_path_cost
 from vis import vis
 import sys
 from termcolor import colored, cprint
@@ -24,9 +24,8 @@ print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
 def ltl_mrta(formula):
     workspace = Workspace()
-    type_robot_location = workspace.type_robot_location.copy()
-    # with open('data/workspace', 'wb') as filehandle:
-    #     pickle.dump(workspace, filehandle)
+    with open('data/workspace', 'wb') as filehandle:
+        pickle.dump(workspace, filehandle)
 
     # fig = plt.figure()
     # ax = fig.add_subplot(111)
@@ -35,7 +34,7 @@ def ltl_mrta(formula):
 
     # with open('data/workspace', 'rb') as filehandle:
     #     workspace = pickle.load(filehandle)
-
+    type_robot_location = workspace.type_robot_location.copy()
     start = datetime.now()
     # --------------- constructing the Buchi automaton ----------------
     task = Task(formula)
@@ -295,6 +294,9 @@ def ltl_mrta(formula):
                     robot_path = {robot: path + robot_path_suf[robot][1:] + robot_path_suf[robot][1:] for
                                   robot, path in robot_path_pre.items()}
 
+                    cost = compute_path_cost({robot: path + robot_path_suf[robot][1:]
+                                              for robot, path in robot_path_pre.items()})
+                    print('the total cost of the found path is: ', cost)
                     print_red_on_cyan(task.formula)
                     print_red_on_cyan(
                         'A path is found for the case where the accepting state does not have a self-loop')

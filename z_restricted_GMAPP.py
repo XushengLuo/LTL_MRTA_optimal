@@ -451,3 +451,15 @@ def update_robot_env(workspace, robot_team_initial_target, robot_move, robot_way
     robot_team_initial_target['other_edges'] = other_edge
 
     return remove_edge
+
+
+def compute_path_cost(paths):
+    """
+    compute the path length
+    """
+    cost = 0
+    for path in paths.values():
+        for i in range(len(path)-1):
+            cost = cost + abs(path[i][0]-path[i+1][0]) + abs(path[i][1]-path[i+1][1])
+
+    return cost

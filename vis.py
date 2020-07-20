@@ -133,8 +133,8 @@ def animate(i, ax, particles, annots, cls_robot_path, time_template, time_text, 
 
 def vis(workspace, robot_path, robot_pre_suf_time, ap):
     num_type = len(workspace.type_num.keys())
-    # color = np.linspace(0.9, 0.1, num_type)
-    color = [0.4, 0.6]
+    color = np.linspace(0.9, 0.1, num_type)
+    # color = [0.4, 0.6]
     x = list((value[0]+0.5, value[1]+0.5) for value in workspace.type_robot_location.values())
     color = [color[i[0]-1] for i in robot_path.keys()]
 

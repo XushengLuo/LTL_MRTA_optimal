@@ -87,7 +87,7 @@ class Task(object):
         # self.formula = '<> (l4_1_1_1 && X (l4_1_1_1 U l5_1_1_0)) && [] <> l6_1_1_1'
         # self.formula = 'l1_1_3_1 && <> l4_1_3_1'
         # self.formula = '<> (!l3_1_1 || l4_1_2_0)'
-        self.formula = '<> ((l2_1_2_1 && ! l3_1_2) && <> l3_1_2_1) && <> l4_2_1_0 && (! l3_1_2 U l4_2_1_0)'
+        # self.formula = '<> ((l2_1_2_1 && ! l3_1_2) && <> l3_1_2_1) && <> l4_2_1_0 && (! l3_1_2 U l4_2_1_0)'
         self.ap = [[['l3', 1, 2]], [['l2', 2, 1]]]
         if formula:
             self.formula = formula
