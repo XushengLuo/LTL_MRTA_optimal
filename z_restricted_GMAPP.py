@@ -124,15 +124,15 @@ def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, rob
                 m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, node)])] for p in time_expanded_graph.predecessors(node))
                             == quicksum(x_vars[(i, edge_index_dict[(node, s)])] for s in time_expanded_graph.successors(node)))
 
-    # (29) head-on collision constraint for a single gadget
-    for edge_pair in gadget:
-        m.addConstr(
-            quicksum(x_vars[i, edge_index_dict[edge]] for i in range(len(robot_index)) for edge in edge_pair) <= 1)
-
-    # (30) the meet collision constraint
-    for node in time_expanded_graph.nodes():
-        m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, node)])] for i in range(len(robot_index))
-                             for p in time_expanded_graph.predecessors(node)) <= 1)
+    # # (29) head-on collision constraint for a single gadget
+    # for edge_pair in gadget:
+    #     m.addConstr(
+    #         quicksum(x_vars[i, edge_index_dict[edge]] for i in range(len(robot_index)) for edge in edge_pair) <= 1)
+    #
+    # # (30) the meet collision constraint
+    # for node in time_expanded_graph.nodes():
+    #     m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, node)])] for i in range(len(robot_index))
+    #                          for p in time_expanded_graph.predecessors(node)) <= 1)
 
     # (32) avoid negative literals
     # 1. negative literals in the edge label at time T
