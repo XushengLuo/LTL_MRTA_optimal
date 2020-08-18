@@ -180,7 +180,7 @@ class Buchi(object):
 
                 for n in init_graph.succ[init]:
                     if not self.ap_sat_label(init_graph.edges[(init, n)]['label'],
-                                                           init_graph.edges[(init, n)]['neg_label']):
+                                             init_graph.edges[(init, n)]['neg_label']):
                         remove_edge.append((init, n))
 
             init_graph.remove_edges_from(remove_edge)
@@ -406,12 +406,6 @@ class Buchi(object):
         if not pos_clause:
             formula = to_dnf('0')
         else:
-            # formula includes positive and negative literals
-            # formula = '|'.join(['&'.join(['&'.join(['_'.join([str(l) for l in lit]) for lit in clause]),
-            #                               '&'.join(['~' + '_'.join([str(l) for l in lit]) for lit in neg_clause[index]])])
-            #                     for index, clause in enumerate(pos_clause)])
-            # if formula[-1] == '&':
-            #     formula = to_dnf(formula[:-1])
             # formula includes only positive literals
             formula = '|'.join(['&'.join(['_'.join([str(l) for l in lit]) for lit in clause])
                                 for index, clause in enumerate(pos_clause)])
@@ -424,7 +418,7 @@ class Buchi(object):
         """
         remove_edge = []
         for edge in self.buchi_graph.edges():
-            if True:  # 'accept' not in edge[1]:
+            if 'accept' not in edge[1]:
                 pair = self.strong_implication_helper(self.buchi_graph.edges[edge]['label'],
                                                       self.buchi_graph.edges[edge]['neg_label'],
                                                       self.buchi_graph.nodes[edge[1]]['label'],
@@ -482,12 +476,12 @@ class Buchi(object):
                 if not edge_clause_imply:
                     return False
             # one clause in node is not implied
-            if len(set([p[1] for p in pair])) != len(node_label):
+            if len(set([p[1] for p in pair])) != len(node_neg_label):
                 return False
             # succeed
             return pair
 
-    def get_subgraph(self, init, accept, is_nonempty_self_loop, segment):
+    def get_subgraph(self, init, accept, segment):
         """
         get the subgraph between init and accept
         """
@@ -565,16 +559,6 @@ class Buchi(object):
         else:
             for s in subgraph.succ[init]:
                 paths = paths + [[init] + p for p in list(nx.all_simple_paths(subgraph, source=s, target=accept))]
-
-        # if self loop around the accepting state, then create an element with edge label ,
-        # solving prefix and suffix together
-        if is_nonempty_self_loop:
-            subgraph.add_node('artificial', label='1',
-                              neg_label=[], formula=to_dnf('1'))
-            subgraph.add_edge(accept, 'artificial', label='1',
-                              neg_label=[], formula=to_dnf('1'))
-            for path in paths:
-                path.append('artificial')
 
         return subgraph, unpruned_subgraph, paths
 
@@ -655,7 +639,7 @@ class Buchi(object):
 
     def map_path_to_element_sequence(self, edge2element, paths):
         """
-
+        map path to sequence of elements
         """
         element_sequences = []  # set of sets of paths sharing the same set of elements
         # put all path that share the same set of elements into one group
@@ -715,9 +699,13 @@ class Buchi(object):
                 if subgraph.nodes[node]['formula'] == subgraph.nodes[succ]['formula']:
                     for next_succ in subgraph.succ[succ]:
                         try:
-                            if subgraph.edges[(node, next_succ)]['formula'] == \
-                                    And(self.buchi_graph.edges[(node, succ)]['formula'],
-                                        self.buchi_graph.edges[(succ, next_succ)]['formula']):
+                            # condition (c)
+                            if ('accept' not in next_succ or
+                                    ('accept' in next_succ and subgraph.nodes[next_succ]['label'] == '1' and
+                                     not subgraph.nodes[next_succ]['neg_label'])) and \
+                                            subgraph.edges[(node, next_succ)]['formula'] == \
+                                            And(self.buchi_graph.edges[(node, succ)]['formula'],
+                                                self.buchi_graph.edges[(succ, next_succ)]['formula']):
                                 removed_edge.append((node, next_succ))
                         except KeyError:
                             continue

@@ -1,4 +1,4 @@
-import main
+import restricted_main
 
 formulae = ['[] <> (l2_1_2_0 && <> l4_1_4_0)',
             '<> l2_1_1_0 && <> l4_1_1_0 && l1_1_1_0 U l4_1_1_0',
@@ -17,4 +17,4 @@ formulae = ['[] <> (l2_1_2_0 && <> l4_1_4_0)',
             '[] <> (l4_1_3_1 && <> l3_1_3_1) && <> [] l2_2_4_0']
 
 for formula in formulae:
-    main.ltl_mrta(formula)
+    restricted_main.ltl_mrta(formula)
