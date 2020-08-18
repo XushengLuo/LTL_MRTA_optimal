@@ -2,6 +2,7 @@ from gurobipy import *
 import math
 from restricted_post_processing import run
 from termcolor import colored, cprint
+import itertools
 
 print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
@@ -36,11 +37,15 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
 
     # binary relation between edge time -- eq (19)
     # no matter the edge label is '1' or not
+    for pair in itertools.combinations(poset, 2):
+        # no subtasks are completed at the same time -- eq (19a)
+        m.addConstr(b_element_vars[(pair[0], pair[1])] + b_element_vars[(pair[1], pair[0])] == 1)
+
     for element in poset:
         for another_element in poset:
             if element != another_element:
-                # no subtasks are completed at the same time -- eq (19a)
-                m.addConstr(b_element_vars[(element, another_element)] + b_element_vars[(another_element, element)] == 1)
+                # # no subtasks are completed at the same time -- eq (19a)
+                # m.addConstr(b_element_vars[(element, another_element)] + b_element_vars[(another_element, element)] == 1)
                 # -- eq (19b)
                 m.addConstr(M * (b_element_vars[(element, another_element)] - 1) <=
                             t_edge_vars[element] - t_edge_vars[another_element])
@@ -49,7 +54,7 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
                             M * b_element_vars[(element, another_element)] - epsilon)
     m.update()
 
-    # using same robot (20a) and (20b)
+    # using same robot (26a) and (26b)
     for robot, eccls in robot2eccl.items():
         clause = [list(group) for key, group in itertools.groupby(eccls, operator.itemgetter(0, 1))]
         num_vertex = len(element_component_clause_literal_node[eccls[0]])
@@ -87,6 +92,12 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
                                   element, self_loop_label, strict_larger_element, incomparable_element, poset_relation,
                                   element_component_clause_literal_node, type_num, M, buchi, pruned_subgraph,
                                   element2edge)
+
+        # activation of the next subtask
+        activate_next(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, b_immediate_element_vars,
+                      element, self_loop_label, strict_larger_element, incomparable_element, poset_relation,
+                      element_component_clause_literal_node, type_num, M, buchi, pruned_subgraph,
+                      element2edge)
     # activation of the first subtask
     activation_first(m, ts, x_vars, t_vars, c_vars, b_element_vars,
                      element_component_clause_literal_node, type_num, M, buchi, pruned_subgraph, element2edge,
@@ -134,7 +145,7 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
 
     # extract the run
     acpt_run = run(pruned_subgraph, time_axis, init_state, element2edge, {'x': x_vars, 'c': c_vars, 't': t_edge_vars},
-                    element_component_clause_literal_node, ts, type_num, dict())
+                   element_component_clause_literal_node, ts, type_num, dict())
 
     return robot_waypoint_pre, robot_time_pre, id2robots, robot_label_pre, robot_waypoint_axis, robot_time_axis, \
            time_axis, acpt_run
@@ -374,10 +385,18 @@ def self_loop_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_
         literal_clause(m, x_vars, c_vars, element, 0, self_loop_label, ts, type_num, clause_nodes, c)
     m.update()
 
+
+def activate_next(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_vars, b_immediate_element_vars,
+                  element, self_loop_label,
+                  strict_larger_element, incomparable_element, poset_relation,
+                  element_component_clause_literal_node, type_num, M, buchi, pruned_subgraph, element2edge):
+    # only one subtask
+    if not b_immediate_element_vars:
+        return
     # subtasks that can immediately follow the current subtask
     strict_smaller = [order[1] for order in poset_relation if order[0] == element]
     # subtask can not be the last one
-    if not strict_smaller:
+    if strict_smaller:
         # there exists a subtask that occurs immediately after it -- eq (16)
         m.addConstr(quicksum(b_immediate_element_vars[(element, another_element)]
                              for another_element in strict_smaller + incomparable_element[element]) == 1)
@@ -398,9 +417,10 @@ def self_loop_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_
     m.update()
 
     # if it can not be the first subtask to be completed, then it has to immediately follow one subtask -- eq (21)
-    if not strict_larger_element[element]:
+    if strict_larger_element[element]:
         m.addConstr(quicksum(b_immediate_element_vars[(another_element, element)]
-                             for another_element in strict_larger_element[element] + incomparable_element[element]) == 1)
+                             for another_element in
+                             strict_larger_element[element] + incomparable_element[element]) == 1)
 
     else:
         m.addConstr(quicksum(b_immediate_element_vars[(another_element, element)]
@@ -426,7 +446,7 @@ def self_loop_constraints(m, ts, x_vars, t_vars, c_vars, t_edge_vars, b_element_
         if self_loop_label_another_ele and self_loop_label_another_ele != '1':
             for c_self_loop in range(len(self_loop_label_another_ele)):
                 for l_self_loop in range(len(self_loop_label_another_ele[c_self_loop])):
-                    for i in element_component_clause_literal_node[(element, 0, c_self_loop, l_self_loop)]:
+                    for i in element_component_clause_literal_node[(another_element, 0, c_self_loop, l_self_loop)]:
                         m.addConstr(quicksum(t_vars[(i, k, 0)] for k in
                                              range(type_num[ts.nodes[i]['location_type_component_element'][1]]))
                                     <= t_edge_vars[element] + 1
@@ -449,7 +469,8 @@ def activation_first(m, ts, x_vars, t_vars, c_vars, b_element_vars,
                             m.addConstr(quicksum(t_vars[(j, k, 0)] for k in range(type_num[ts.nodes[j]
                             ['location_type_component_element'][1]])) <=
                                         M * (quicksum(b_element_vars[(element, another_element)]
-                                                      for another_element in maximal_element if another_element != element) +
+                                                      for another_element in maximal_element if
+                                                      another_element != element) +
                                              1 - c_vars[(element, 0, c)]))
 
     m.update()
@@ -458,8 +479,8 @@ def activation_first(m, ts, x_vars, t_vars, c_vars, b_element_vars,
         m.addConstr(quicksum(b_element_vars[(element, another_element)] for another_element in maximal_element
                              if another_element != element) - M * (1 - b_maximal_element_vars[element]) <= 0)
         m.addConstr((1 - b_maximal_element_vars[element]) - M * quicksum(b_element_vars[(element, another_element)]
-                                                                for another_element in maximal_element
-                                                                if another_element != element) <= 0)
+                                                                         for another_element in maximal_element
+                                                                         if another_element != element) <= 0)
     m.update()
 
     # the constraints regarding the categories of leaving vertices -- eq (25)

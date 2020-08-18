@@ -124,15 +124,15 @@ def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, rob
                 m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, node)])] for p in time_expanded_graph.predecessors(node))
                             == quicksum(x_vars[(i, edge_index_dict[(node, s)])] for s in time_expanded_graph.successors(node)))
 
-    # # (29) head-on collision constraint for a single gadget
-    # for edge_pair in gadget:
-    #     m.addConstr(
-    #         quicksum(x_vars[i, edge_index_dict[edge]] for i in range(len(robot_index)) for edge in edge_pair) <= 1)
-    #
-    # # (30) the meet collision constraint
-    # for node in time_expanded_graph.nodes():
-    #     m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, node)])] for i in range(len(robot_index))
-    #                          for p in time_expanded_graph.predecessors(node)) <= 1)
+    # (29) head-on collision constraint for a single gadget
+    for edge_pair in gadget:
+        m.addConstr(
+            quicksum(x_vars[i, edge_index_dict[edge]] for i in range(len(robot_index)) for edge in edge_pair) <= 1)
+
+    # (30) the meet collision constraint
+    for node in time_expanded_graph.nodes():
+        m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, node)])] for i in range(len(robot_index))
+                             for p in time_expanded_graph.predecessors(node)) <= 1)
 
     # (32) avoid negative literals
     # 1. negative literals in the edge label at time T
@@ -252,13 +252,8 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
         robot_path = {type_robot: [location] for type_robot, location in workspace.type_robot_location.items()}
         robot_progress = {robot: -1 for robot in robot_waypoint.keys()}
         clock = -1
-        # with self-loop, stop at the second-to-last subtask since the last one is true
-        is_nonempty_self_loop = False
-        if is_nonempty_self_loop:
-            effective_length = len(acpt_run)-2
-        # without self-loop, stop at the last subtask
-        else:
-            effective_length = len(acpt_run)-1
+        # stop at the last subtask
+        effective_length = len(acpt_run)-1
 
         while clock < effective_length:
             # check if the initial robot locations satisfy the first subtask or the current subtask is '1'
@@ -277,14 +272,14 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
                                                  acpt_run[clock+1]['essential_robot_edge'].items() for robot in robots}
             robot_team_initial_target['vertex1'] = {robot: (robot_path[robot][-1], target) for target, robots in
                                                     acpt_run[clock+1]['essential_robot_vertex'].items() for robot in robots}
-            # 1. with self-loop, 2. without self-loop but not the last subtask:
+            # not the last subtask:
             # activiate the vertex of the next subtask
-            if is_nonempty_self_loop or clock + 1 < effective_length:
+            if clock + 1 < effective_length:
                 robot_team_initial_target['vertex2'] = {robot: (robot_path[robot][-1], target) for target, robots in
                                                         acpt_run[clock+2]['essential_robot_vertex'].items()
                                                         for robot in robots}
-            # without self-loop and the last subtask: none
-            elif not is_nonempty_self_loop and clock + 1 == effective_length:
+            # the last subtask: none
+            elif clock + 1 == effective_length:
                 robot_team_initial_target['vertex2'] = dict()
                 not_accept = False
 
@@ -292,9 +287,9 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
             neg_clause = dict()
             neg_clause['edge'] = acpt_run[clock+1]['neg_edge']
             neg_clause['vertex1'] = acpt_run[clock+1]['neg_vertex']
-            if is_nonempty_self_loop or clock + 1 < effective_length:
+            if clock + 1 < effective_length:
                 neg_clause['vertex2'] = acpt_run[clock+2]['neg_vertex']
-            elif not is_nonempty_self_loop and clock + 1 == effective_length:
+            elif clock + 1 == effective_length:
                 neg_clause['vertex2'] = []
 
             # update robot_team_initial_target by considering simultaneity
@@ -322,9 +317,9 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
                 mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
                                                        robot_init, not_accept)
                 if mapp_paths:
-                    # 1. with self-loop, 2. without self-loop but not the last subtask:
+                    # not the last subtask:
                     # activiate the vertex of the next subtask
-                    if is_nonempty_self_loop or clock + 1 < effective_length:
+                    if clock + 1 < effective_length:
                         # update the path: second to the last to one
                         for robot, path in mapp_paths.items():
                             robot_path[robot] += path[1:-1]
@@ -333,7 +328,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
                                 robot_path[robot] += [robot_path[robot][-1]] * T
                         break
                     # without self-loop and the last subtask: activate the vertex label
-                    elif not is_nonempty_self_loop and clock + 1 == effective_length:
+                    elif clock + 1 == effective_length:
                         # update the path: second to the last
                         for robot, path in mapp_paths.items():
                             robot_path[robot] += path[1:]

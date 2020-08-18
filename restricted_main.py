@@ -152,64 +152,63 @@ def ltl_mrta(formula):
 
             # vis(workspace, robot_path_pre, {robot: [len(path)] * 2 for robot, path in robot_path_pre.items()},
             #     [])
-            if True:
+            # ----------------- check whether the final locations of the prefix part satisfy the accept state ---------
+            workspace.type_robot_location = {robot: path[-1] for robot, path in robot_path_pre.items()}
+            workspace.update_after_prefix()
+            buchi.atomic_prop = workspace.atomic_prop
+
+            if buchi.ap_sat_label(pruned_subgraph.nodes[accept_state]['label'],
+                                  pruned_subgraph.nodes[accept_state]['neg_label']):
                 print_red_on_cyan(task.formula)
                 print_red_on_cyan('A path is found for the case where the accepting state has a self-loop')
                 vis(workspace, robot_path_pre, {robot: [len(path)] * 2 for robot, path in robot_path_pre.items()},
                     [])
 
                 return
-            #
-            #     # ======================================= suffix part ==================================================
-            #     print_red_on_cyan('================ suffix part ================')
-            #     if not is_nonempty_self_loop:
-            #         # ----------------- update after the prefix -----------------
-            #         workspace.type_robot_location = {robot: path[-1] for robot, path in robot_path_pre.items()}
-            #         workspace.update_after_prefix()
-            #         buchi.atomic_prop = workspace.atomic_prop
-            #
-            #         # ----------------- infer the poset -----------------------
-            #
-            #         pruned_subgraph, unpruned_subgraph, paths = buchi.get_subgraph(accept_state, accept_state, False,
-            #                                                                        'suffix')
-            #         # no suffix graph due to that final locations of prefix part do not satisfy the outgoing edges
-            #         # of the accepting vertex
-            #         if not pruned_subgraph:
-            #             continue
-            #
-            #         buchi.implication_check(pruned_subgraph, paths)
-            #         # no paths due to the implication does not hold
-            #         if not paths:
-            #             continue
-            #
-            #         edge2element, element2edge = buchi.get_element(pruned_subgraph)
-            #
-            #         element_component2label = buchi.element2label2eccl(element2edge, pruned_subgraph)
-            #
-            #         hasse_graphs = buchi.map_path_to_element_sequence(edge2element, paths)
-            #
-            #         for _, poset_relation, pos, hasse_diagram in hasse_graphs:
-            #
-            #             for order in poset_relation:
-            #                 print(pruned_subgraph.edges[element2edge[order[0]]]['formula'], ' -> ',
-            #                       pruned_subgraph.edges[element2edge[order[1]]]['formula'])
-            #             print('----------------------------------------------')
-            #
-            #             robot2eccl = z_restricted_poset.element2robot2eccl(pos, element2edge, pruned_subgraph)
-            #
-            #             incomparable_element, larger_element = z_restricted_poset.incomparable_larger(pos, hasse_diagram,
-            #                                                                                           pruned_subgraph,
-            #                                                                                           element2edge)
-            #             # --------------- construct the routing graph ---------------
-            #             minimal_element = [node for node in hasse_diagram.nodes() if hasse_diagram.out_degree(node) == 0]
-            #             init_type_robot_node, element_component_clause_literal_node, node_location_type_component_element, \
-            #             num_nodes, final_element_type_robot_node \
-            #                 = z_restricted_weighted_ts_suffix.construct_node_set(pos,
-            #                                                                      element2edge,
-            #                                                                      pruned_subgraph,
-            #                                                                      workspace.type_robot_label,
-            #                                                                      minimal_element)
-            #
+
+                # ======================================= suffix part ==================================================
+            print_red_on_cyan('================ suffix part ================')
+
+            # ----------------- infer the poset -----------------------
+
+            pruned_subgraph, unpruned_subgraph, paths = buchi.get_subgraph(accept_state, accept_state, 'suffix')
+            # no suffix graph due to that final locations of prefix part do not satisfy the outgoing edges
+            # of the accepting vertex
+            if not pruned_subgraph:
+                continue
+
+            buchi.implication_check(pruned_subgraph, paths)
+            # no paths due to the implication does not hold
+            if not paths:
+                continue
+
+            edge2element, element2edge = buchi.get_element(pruned_subgraph)
+
+            element_component2label = buchi.element2label2eccl(element2edge, pruned_subgraph)
+
+            hasse_graphs = buchi.map_path_to_element_sequence(edge2element, paths)
+
+            for _, poset_relation, pos, hasse_diagram in hasse_graphs:
+
+                for order in poset_relation:
+                    print(pruned_subgraph.edges[element2edge[order[0]]]['formula'], ' -> ',
+                          pruned_subgraph.edges[element2edge[order[1]]]['formula'])
+                print('----------------------------------------------')
+
+                robot2eccl = restricted_poset.element2robot2eccl(pos, element2edge, pruned_subgraph)
+
+                incomparable_element, larger_element = restricted_poset.incomparable_larger(pos, poset_relation,
+                                                                                            hasse_diagram)
+                # --------------- construct the routing graph ---------------
+                # minimal_element = [node for node in hasse_diagram.nodes() if hasse_diagram.out_degree(node) == 0]
+                # init_type_robot_node, element_component_clause_literal_node, node_location_type_component_element, \
+                # num_nodes, final_element_type_robot_node \
+                #     = z_restricted_weighted_ts_suffix.construct_node_set(pos,
+                #                                                          element2edge,
+                #                                                          pruned_subgraph,
+                #                                                          workspace.type_robot_label,
+                #                                                          minimal_element)
+
             #             edge_set = z_restricted_weighted_ts_suffix.construct_edge_set(pos,
             #                                                                           element_component_clause_literal_node,
             #                                                                           element2edge, pruned_subgraph,

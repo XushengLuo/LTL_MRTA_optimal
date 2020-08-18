@@ -25,18 +25,11 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
         # Determine the set of identical time instants
         instant_element = time_axis[clock + 1]
         if acpt_run_:
-            pre_essential_clause_edge = acpt_run_[-1]['essential_clause_edge']
+            pre_neg_edge = acpt_run_[-1]['neg_edge']
         else:
-            pre_essential_clause_edge = []
+            pre_neg_edge = []
         # loop over each successor to see whether progress can be made
         for succ in graph.succ[node]:
-            # initial vertex is the accepting vertex at the same time, we view these two differently
-            # the successor of initial vertex does not include the arificial vertex
-            if clock + 1 == 0 and succ == 'artificial':
-                continue
-            # # the successor of accepting vertex does not include other vertcies than the artificial vertex
-            # if clock + 1 != 0 and 'accept' in node and succ != 'artificial':
-            #     continue
             # equivalent subtask
             if graph.edges[element2edge[instant_element[1]]]['formula'] == graph.edges[(node, succ)]['formula'] and \
                             graph.nodes[element2edge[instant_element[1]][0]]['formula'] == graph.nodes[node]['formula']:
@@ -58,7 +51,7 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
                     = determine_essentials(instant_element, var, graph.nodes[node]['label'],
                                            graph.nodes[node]['neg_label'], 0,
                                            element_component_clause_literal_node, ts, type_num, dict(),
-                                           pre_essential_clause_edge, essential_clause_edge)
+                                           pre_neg_edge, essential_clause_edge)
 
                 # clock, the exact time when transition occurs
                 acpt_run = acpt_run_.copy()  # copy the history
@@ -68,8 +61,7 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
                                  'essential_robot_vertex': exe_robots_vertex,
                                  'neg_vertex': neg_clause_vertex})
 
-                # 1: self-loop exists, stop when artificial is reached
-                # 2: self-loop does not exist, stop when accept is reached
+                # stop when accept is reached
                 if 'accept' in succ:
                     return acpt_run
                 # clock + 1, after reaching succ, the immediate time clock that should be verified
@@ -78,7 +70,7 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
 
 def determine_essentials(instant_element, var, label, neg_label, component,
                          element_component_clause_literal_node, ts, type_num, type_robot_label,
-                         pre_complete_clause_formula=[],
+                         pre_neg_edge=[],
                          cur_complete_clause_formula=[]):
     """
     determine the essential clause and the essential robots
@@ -86,14 +78,15 @@ def determine_essentials(instant_element, var, label, neg_label, component,
     if label == '1':
         # negative clause that is conjunctive with satisfied positive literals
         if neg_label:
-            for clause in neg_label:
-                # do not exclude with previous edge label
-                if not_exclusion(pre_complete_clause_formula, clause):
-                    neg_clause = clause
-                # might as well exclude with the current edge label
-                if not not_exclusion(cur_complete_clause_formula, clause):
-                    neg_clause = clause
-                    break
+            # neg vertex label: implied by the  previous neg edge label
+            if component == 0:
+                for clause in neg_label:
+                    if set(clause).issubset(set(pre_neg_edge)):
+                        neg_clause = clause
+                        break
+            else:
+                # randomly choose one negative clause for the edge
+                neg_clause = neg_label[0]
         else:
             neg_clause = []
         return '1', neg_clause, dict()
@@ -116,7 +109,7 @@ def determine_essentials(instant_element, var, label, neg_label, component,
                             if sum([round(var['x'][(p, i, k)].x) for p in ts.predecessors(i)]) == 1:
                                 exe_robots[lit[0]].append((lit[1], k))
                                 break
-            # extra literal
+            # extra literal added to the last subtasks in the suffix part
             else:
                 essential_clause = []
                 neg_clause = []

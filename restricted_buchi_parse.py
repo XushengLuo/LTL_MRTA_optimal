@@ -418,7 +418,7 @@ class Buchi(object):
         """
         remove_edge = []
         for edge in self.buchi_graph.edges():
-            if 'accept' not in edge[1]:
+            if True:  # 'accept' not in edge[1]:
                 pair = self.strong_implication_helper(self.buchi_graph.edges[edge]['label'],
                                                       self.buchi_graph.edges[edge]['neg_label'],
                                                       self.buchi_graph.nodes[edge[1]]['label'],
@@ -686,7 +686,7 @@ class Buchi(object):
             # h = len([e for e in hasse.nodes if pruned_subgraph.nodes[element2edge[e][0]]['label'] != '1'])
             hasse_graphs[index] = [(w, h), {edge for edge in hasse.edges()}, list(hasse.nodes), hasse]
 
-        return sorted(hasse_graphs.values(), key=lambda x: (x[0][0], -x[0][1]), reverse=True)
+        return sorted(hasse_graphs.values(), key=lambda x: (x[0][0], x[0][1]), reverse=True)
 
     def prune_subgraph_automaton(self, subgraph):
         """
