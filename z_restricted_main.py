@@ -21,7 +21,6 @@ from termcolor import colored, cprint
 
 print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
-
 def ltl_mrta(formula):
     workspace = Workspace()
     with open('data/workspace', 'wb') as filehandle:

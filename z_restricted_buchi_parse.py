@@ -710,21 +710,6 @@ class Buchi(object):
                     in_between.update(set(path))
         return in_between
 
-        # front = set(head)
-        # explored = set()
-        # in_between = set(head)
-        # while front:
-        #     try:
-        #         node = front.pop()
-        #         explored.add(node)
-        #         for s in self.buchi_graph.succ[node]:
-        #             if s not in explored and s not in front and nx.has_path(self.buchi_graph, s, tail):
-        #                 front.add(s)
-        #                 in_between.add(s)
-        #     except KeyError:
-        #         continue
-        # return in_between
-
     def implication_check(self, pruned_subgraph, paths):
         """
         check whether the final locations of the prefix part

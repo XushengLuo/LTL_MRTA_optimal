@@ -57,12 +57,22 @@ class Task(object):
 
         # self.formula = '<> (l2_1_2_1 && X <> l3_1_2_1) && <> l4_2_1_0 && ! l3_1_2_0 U l4_2_1_0'
         # && [] ! l8_1_1_0 && []! l9_1_1_0
+        # -----------------test strong implication -------------
+        self.formula = '<> (l2_1_1_0 && !l3_1_1) && [] <> l2_1_1_0'
+        self.formula = '[] <> (l2_1_1_0 || l3_1_1_0)'
+        self.formula = '<> (l2_1_1_0 || l4_1_1_0) && []! l3_1_1'
+        self.formula = '<> (l2_1_1_0 || l4_1_1_0) && []! l3_1_1 && [] <> (l2_1_1_0 || l4_1_1_0)'
+        self.formula = '[] <> (!l3_1_1 || !l4_1_1)'
+        self.formula = '[] <> (!l3_1_1 || l4_1_1_0 || !l5_1_1 )'
+        self.formula = '<> !l3_1_1'
+
+
         # ----------------- test prunging steps ----------------
         # self.formula = '<> (l1_1_2_0 && !l1_1_1 && !l1_1_2) && <> l2_2_1_0'
         # self.formula = 'l1_1_2_0'
         # self.formula = '(l1_1_2_0 && !l1_1_5_0) U l2_1_1_0'
         # ----------------- test the poset mining ---------------
-        self.formula = '[] <> (l2_1_1_0 && <> l4_1_1_0)'
+        # self.formula = '[] <> (l2_1_1_0 && <> l4_1_1_0)'
         # self.formula = '<> l2_1_1_0 && <> l4_1_1_0 && l1_1_1_0 U l4_1_1_0'
         # self.formula = '<> (l4_1_2_1 && l3_1_1_0 && !l4_2_1) && <> l5_1_2_1 && [] !l2_1_1'
         # self.formula = '<> (l3_1_2_1 && <> l4_1_2_1)'
