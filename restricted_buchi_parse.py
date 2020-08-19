@@ -32,6 +32,7 @@ class Buchi(object):
         self.regions = workspace.regions
         self.imply = dict()
         self.remove_init_attr = dict()
+        self.size = [0, 0]
         # graph of buchi automaton
         self.buchi_graph = DiGraph(type='buchi', init=[], accept=[])
 
@@ -48,7 +49,7 @@ class Buchi(object):
         # find all states/nodes in the buchi automaton
         state_re = re.compile(r'\n(\w+):\n\t')
         state_group = re.findall(state_re, output)
-
+        self.size[0] = len(state_group)
         # find initial and accepting states
         init = [s for s in state_group if 'init' in s]
         # treat the node accept_init as init node
@@ -66,6 +67,8 @@ class Buchi(object):
             if state_if_fi:
                 relation_group = re.findall(r':: (\(.*?\)) -> goto (\w+)\n\t', state_if_fi[0])
                 for symbol, next_state in relation_group:
+                    if state != next_state:
+                        self.size[1] += 1
                     symbol = symbol.replace('||', '|').replace('&&', '&').replace('!', '~')
                     # check literals in labels to merge and delete
                     edge_label, neg_label, formula = self.merge_check_feasible(symbol)

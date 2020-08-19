@@ -11,7 +11,7 @@ def isEquivalent(expr1, expr2):
 
 # ------------- get accepted runs using the waypoint only ----------------
 def run(graph, time_axis, initial, element2edge, var, element_component_clause_literal_node, ts, type_num,
-        type_robot_label, last_subtask=None, loop=False):
+        type_robot_label, buchi, show, last_subtask=None, loop=False):
     """
     the accepting run incurred by the path
     """
@@ -19,7 +19,8 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
     frontier = [[initial, -1, []]]
     # iterate until the accepting state is reached
     while True:
-        print([f[0] for f in frontier])
+        if show:
+            print([f[0] for f in frontier])
         node, clock, acpt_run_ = frontier.pop()
 
         # Determine the set of identical time instants
@@ -45,14 +46,14 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
                     = determine_essentials(instant_element, var, graph.edges[(node, succ)]['label'],
                                            graph.edges[(node, succ)]['neg_label'], 1,
                                            element_component_clause_literal_node, ts, type_num,
-                                           type_robot_label, last_subtask, [], [], loop)
+                                           type_robot_label, last_subtask, buchi, [], loop)
 
                 essential_clause_vertex, neg_clause_vertex, exe_robots_vertex \
                     = determine_essentials(instant_element, var, graph.nodes[node]['label'],
                                            graph.nodes[node]['neg_label'], 0,
                                            element_component_clause_literal_node, ts, type_num, dict(),
-                                           last_subtask,
-                                           pre_neg_edge, essential_clause_edge, loop)
+                                           last_subtask, buchi,
+                                           pre_neg_edge, loop)
 
                 # clock, the exact time when transition occurs
                 acpt_run = acpt_run_.copy()  # copy the history
@@ -71,9 +72,9 @@ def run(graph, time_axis, initial, element2edge, var, element_component_clause_l
 
 def determine_essentials(instant_element, var, label, neg_label, component,
                          element_component_clause_literal_node, ts, type_num,
-                         type_robot_label, last_subtask,
+                         type_robot_label, last_subtask, buchi,
                          pre_neg_edge=[],
-                         cur_complete_clause_formula=[], loop=False):
+                         loop=False):
     """
     determine the essential clause and the essential robots
     """
@@ -83,6 +84,12 @@ def determine_essentials(instant_element, var, label, neg_label, component,
             # neg vertex label: implied by the  previous neg edge label
             if component == 0:
                 for clause in neg_label:
+                    # initial state with negative clause
+                    if not pre_neg_edge:
+                        if buchi.ap_sat_label('1', [clause]):
+                            neg_clause = clause
+                            break
+                    # othereise, subformula
                     if set(clause).issubset(set(pre_neg_edge)):
                         neg_clause = clause
                         break

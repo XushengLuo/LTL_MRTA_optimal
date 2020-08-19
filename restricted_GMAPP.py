@@ -8,7 +8,7 @@ import datetime
 import numpy as np
 
 
-def multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause, robot_init):
+def multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause, robot_init, show):
     # build the time_expanded graph
     time_expanded_graph = nx.DiGraph()
     # s = datetime.datetime.now()
@@ -18,7 +18,7 @@ def multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_mov
     # ILP formulation
     m = Model()
     return ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, robot_index, edge_index_dict,
-               index_edge_dict, neg_clause, workspace, T, robot_init)
+               index_edge_dict, neg_clause, workspace, T, robot_init, show)
 
 
 def build_time_expanded_graph(workspace, T, robot_move, time_expanded_graph):
@@ -58,7 +58,7 @@ def build_time_expanded_graph(workspace, T, robot_move, time_expanded_graph):
 
 
 def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, robot_index, edge_index_dict, index_edge_dict,
-        neg_clause, workspace, T, robot_init):
+        neg_clause, workspace, T, robot_init, show):
     """
     build the ILP to solve GMMPP
     """
@@ -156,7 +156,8 @@ def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, rob
         print('Model is infeasible or unbounded')
         return None
     elif m.status == GRB.Status.INFEASIBLE:
-        print('Model is infeasible')
+        if show:
+            print('Model is infeasible')
         return None
     elif m.status == GRB.Status.UNBOUNDED:
         print('Model is unbounded')
@@ -190,7 +191,7 @@ def extract_paths(x_vars, time_expanded_graph, loc2node, robot_index, edge_index
     return paths
 
 
-def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
+def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show):
     """
     Generalized multi-robot path planning
     """
@@ -209,7 +210,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
                 horizon = clock[2]
             for T in range(horizon, horizon + 100, 1):
                 paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, acpt_run[clock][3],
-                                                  acpt_run[clock][4])
+                                                  acpt_run[clock][4], show)
                 if paths:
                     # update
                     for robot, path in paths.items():
@@ -220,7 +221,8 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
                     break
 
         end = datetime.datetime.now()
-        print((end - start).total_seconds())
+        if show:
+            print((end - start).total_seconds())
 
         # vis(workspace, robot_path, {robot: [len(path)] * 2 for robot, path in robot_path.items()}, [])
     elif order == 'simultaneous':
@@ -275,7 +277,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
             robot_init = {robot: path[-1] for robot, path in robot_path.items()}
             for T in range(horizon, horizon + 100, 1):
                 mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
-                                                       robot_init)
+                                                       robot_init, show)
                 if mapp_paths:
                     # update the path: second to the last
                     for robot, path in mapp_paths.items():
@@ -301,15 +303,16 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
             # update the overall plan
             for subseq_clock in range(clock+1, len(acpt_run)):
                 acpt_run[subseq_clock]['time_element'][0] = acpt_run[subseq_clock]['time_element'][0] + T - horizon
-
-            print(acpt_run[clock + 1]['subtask'], acpt_run[clock+1]['time_element'][0])
+            if show:
+                print(acpt_run[clock + 1]['subtask'], acpt_run[clock+1]['time_element'][0])
             # restore removed edges
             workspace.graph_workspace.add_edges_from(itertools.chain(remove_edge))
             # plt.show()
             clock += 1
 
         end = datetime.datetime.now()
-        print('GMMPP: ', (end - start).total_seconds())
+        if show:
+            print('GMMPP: ', (end - start).total_seconds())
 
         return robot_path
 
@@ -436,9 +439,8 @@ def return_to_initial(workspace, acpt_run, suf_last):
     horizon = next_time - past_time
     robot_init = {robot: path[-1] for robot, path in robot_path.items()}
     for T in range(horizon, horizon + 100, 1):
-        print(T)
         mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
-                                               robot_init)
+                                               robot_init, show)
         if mapp_paths:
             # update the path: second to the last
             for robot, path in mapp_paths.items():
