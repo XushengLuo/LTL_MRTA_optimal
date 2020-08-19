@@ -404,3 +404,48 @@ def compute_path_cost(paths):
             cost = cost + abs(path[i][0]-path[i+1][0]) + abs(path[i][1]-path[i+1][1])
 
     return cost
+
+
+def return_to_initial(workspace, acpt_run, suf_last):
+    robot_path = {type_robot: [location] for type_robot, location in suf_last.items()}
+
+    # determine the target for robots: (1) edge (2) vertex of the current subtask
+    robot_team_initial_target = dict()
+    robot_team_initial_target['edge'] = {robot: (robot_path[robot][-1], target) for target, robots in
+                                         acpt_run['essential_robot_edge'].items() for robot in robots}
+    robot_team_initial_target['vertex1'] = {robot: (robot_path[robot][-1], target) for target, robots in
+                                            acpt_run['essential_robot_vertex'].items() for robot in
+                                            robots}
+    robot_team_initial_target['other_edges'] = {}
+
+    # determine the running and terminal constraints
+    neg_clause = dict()
+    neg_clause['edge'] = acpt_run['neg_edge']
+    neg_clause['vertex1'] = acpt_run['neg_vertex']
+
+    # update robot_team_initial_target by considering simultaneity
+    next_time = acpt_run['time_element'][0]  # the completion of the current subtask
+
+    # robots that need to move according to positive literals
+    robot_move = list(robot_path.keys())
+
+    # ------ find the collision-avoidance paths for involved robots ---------
+    # the completion time of last subtask
+    past_time = 0
+    # expected horizon according to high-level plan
+    horizon = next_time - past_time
+    robot_init = {robot: path[-1] for robot, path in robot_path.items()}
+    for T in range(horizon, horizon + 100, 1):
+        print(T)
+        mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
+                                               robot_init)
+        if mapp_paths:
+            # update the path: second to the last
+            for robot, path in mapp_paths.items():
+                robot_path[robot] += path[1:]
+            for robot in robot_path.keys():
+                if robot not in mapp_paths.keys():
+                    robot_path[robot] += [robot_path[robot][-1]] * T
+            break
+
+    return robot_path

@@ -266,8 +266,7 @@ class Workspace(object):
         # region and corresponding locations
         self.label_location = {'r{0}'.format(i + 1): j for i, j in enumerate(list(self.type_robot_location.values()))}
         # if robots return to their initial locations
-        if loop:
-            self.regions.update({label: [region] for label, region in self.label_location.items()})
+        self.regions.update({label: [region] for label, region in self.label_location.items()})
 
         # region where robots reside
         self.type_robot_label = dict(zip(self.type_robot_location.keys(), self.label_location.keys()))
@@ -298,3 +297,16 @@ class Workspace(object):
                                                                         target=self.label_location[key_init[r2]])
                     self.p2p[(key_init[r1], key_init[r2])] = length
                     self.p2p[(key_init[r2], key_init[r1])] = length
+
+    def longest_time(self, init, target):
+        """
+        the longest time to return to initial locations
+        """
+        horizon = 0
+        for robot in init.keys():
+            length, _ = nx.algorithms.single_source_dijkstra(self.graph_workspace,
+                                                             source=init[robot],
+                                                             target=target[robot])
+            if length > horizon:
+                horizon = length
+        return horizon

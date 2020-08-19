@@ -118,6 +118,7 @@ def determine_essentials(instant_element, var, label, neg_label, component,
                     essential_clause = []
                     neg_clause = []
                     exe_robots = {label: [type_robot] for type_robot, label in type_robot_label.items()}
+                # return to respective regions
                 else:
                     essential_clause = last_subtask['essential_clause_edge']
                     neg_clause = last_subtask['neg_edge']

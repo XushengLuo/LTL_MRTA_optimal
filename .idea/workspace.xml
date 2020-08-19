@@ -2,20 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="429973ab-9b76-4e6a-84c4-52a83ab96e95" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/restricted_milp_suf.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/restricted_weighted_ts_suffix.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/workspace" afterPath="$PROJECT_DIR$/data/workspace" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gurobi.log" afterPath="$PROJECT_DIR$/gurobi.log" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/restricted_GMAPP.py" afterPath="$PROJECT_DIR$/restricted_GMAPP.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/restricted_buchi_parse.py" afterPath="$PROJECT_DIR$/restricted_buchi_parse.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/restricted_main.py" afterPath="$PROJECT_DIR$/restricted_main.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/restricted_post_processing.py" afterPath="$PROJECT_DIR$/restricted_post_processing.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/restricted_weighted_ts.py" afterPath="$PROJECT_DIR$/restricted_weighted_ts.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/task.py" afterPath="$PROJECT_DIR$/task.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/workspace_dars.py" afterPath="$PROJECT_DIR$/workspace_dars.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/z_restricted_main.py" afterPath="$PROJECT_DIR$/z_restricted_main.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/z_restricted_post_processing.py" afterPath="$PROJECT_DIR$/z_restricted_post_processing.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -42,8 +35,8 @@
       <file leaf-file-name="workspace_dars.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/workspace_dars.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="200">
-              <caret line="264" column="8" lean-forward="false" selection-start-line="264" selection-start-column="8" selection-end-line="264" selection-end-column="8" />
+            <state relative-caret-position="240">
+              <caret line="25" column="15" lean-forward="true" selection-start-line="25" selection-start-column="15" selection-end-line="25" selection-end-column="15" />
               <folding />
             </state>
           </provider>
@@ -57,16 +50,6 @@
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="restricted_weighted_ts_suffix.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/restricted_weighted_ts_suffix.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="361">
-              <caret line="233" column="7" lean-forward="true" selection-start-line="233" selection-start-column="7" selection-end-line="233" selection-end-column="7" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -86,18 +69,18 @@
       <file leaf-file-name="task.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/task.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="116">
-              <caret line="80" column="73" lean-forward="false" selection-start-line="80" selection-start-column="73" selection-end-line="80" selection-end-column="73" />
+            <state relative-caret-position="337">
+              <caret line="88" column="58" lean-forward="false" selection-start-line="88" selection-start-column="58" selection-end-line="88" selection-end-column="58" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="restricted_post_processing.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="restricted_post_processing.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/restricted_post_processing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-198">
-              <caret line="75" column="59" lean-forward="false" selection-start-line="75" selection-start-column="59" selection-end-line="75" selection-end-column="59" />
+            <state relative-caret-position="331">
+              <caret line="118" column="35" lean-forward="true" selection-start-line="118" selection-start-column="35" selection-end-line="118" selection-end-column="35" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -108,8 +91,8 @@
       <file leaf-file-name="restricted_main.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/restricted_main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="191">
-              <caret line="155" column="31" lean-forward="false" selection-start-line="155" selection-start-column="31" selection-end-line="155" selection-end-column="31" />
+            <state relative-caret-position="264">
+              <caret line="36" column="52" lean-forward="true" selection-start-line="36" selection-start-column="52" selection-end-line="36" selection-end-column="52" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -117,11 +100,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="restricted_GMAPP.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="restricted_GMAPP.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/restricted_GMAPP.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="17" column="21" lean-forward="true" selection-start-line="17" selection-start-column="21" selection-end-line="17" selection-end-column="21" />
+            <state relative-caret-position="432">
+              <caret line="135" column="41" lean-forward="true" selection-start-line="135" selection-start-column="41" selection-end-line="135" selection-end-column="41" />
               <folding />
             </state>
           </provider>
@@ -143,10 +126,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>print</find>
-      <find>strict</find>
-      <find>(10)</find>
-      <find>ap_sa</find>
       <find>collision</find>
       <find>ap_sat_label</find>
       <find>self</find>
@@ -166,13 +145,17 @@
       <find>buchi.a</find>
       <find>hass</find>
       <find>loop\)</find>
-      <find>get_su</find>
-      <find>after</find>
       <find>loop</find>
       <find>loop =</find>
-      <find>mapp</find>
       <find>multi_agent_path_planning</find>
       <find>constraint</find>
+      <find>'subtask'</find>
+      <find>time_element</find>
+      <find>mapp</find>
+      <find>get_su</find>
+      <find>return</find>
+      <find>essential_clause_edge</find>
+      <find>after</find>
     </findStrings>
     <replaceStrings>
       <replace>clock</replace>
@@ -210,21 +193,21 @@
         <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/restricted_poset.py" />
         <option value="$PROJECT_DIR$/restricted_milp.py" />
-        <option value="$PROJECT_DIR$/workspace_dars.py" />
         <option value="$PROJECT_DIR$/z_restricted_main.py" />
         <option value="$PROJECT_DIR$/restricted_weighted_ts.py" />
         <option value="$PROJECT_DIR$/z_restricted_post_processing.py" />
         <option value="$PROJECT_DIR$/restricted_milp_suf.py" />
         <option value="$PROJECT_DIR$/restricted_buchi_parse.py" />
         <option value="$PROJECT_DIR$/restricted_weighted_ts_suffix.py" />
-        <option value="$PROJECT_DIR$/restricted_post_processing.py" />
+        <option value="$PROJECT_DIR$/workspace_dars.py" />
+        <option value="$PROJECT_DIR$/restricted_GMAPP.py" />
         <option value="$PROJECT_DIR$/task.py" />
         <option value="$PROJECT_DIR$/restricted_main.py" />
-        <option value="$PROJECT_DIR$/restricted_GMAPP.py" />
+        <option value="$PROJECT_DIR$/restricted_post_processing.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="1440" />
     <option name="y" value="23" />
     <option name="width" value="960" />
@@ -399,7 +382,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1440" y="23" width="960" height="1057" extended-state="0" />
+    <frame x="1440" y="23" width="1920" height="1057" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.28431374" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -410,7 +393,7 @@
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3290735" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24836601" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3283582" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.27795526" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3343983" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -474,9 +457,14 @@
           <option name="timeStamp" value="259" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/restricted_main.py</url>
-          <line>239</line>
-          <option name="timeStamp" value="329" />
+          <url>file://$PROJECT_DIR$/restricted_GMAPP.py</url>
+          <line>439</line>
+          <option name="timeStamp" value="340" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/restricted_GMAPP.py</url>
+          <line>100</line>
+          <option name="timeStamp" value="341" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -486,7 +474,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="330" />
+      <option name="time" value="342" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -816,16 +804,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/restricted_milp.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="140">
-          <caret line="142" column="83" lean-forward="true" selection-start-line="142" selection-start-column="83" selection-end-line="142" selection-end-column="83" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/restricted_weighted_ts_suffix.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="361">
@@ -855,29 +833,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/restricted_post_processing.py">
+    <entry file="file://$PROJECT_DIR$/restricted_milp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-198">
-          <caret line="75" column="59" lean-forward="false" selection-start-line="75" selection-start-column="59" selection-end-line="75" selection-end-column="59" />
+        <state relative-caret-position="140">
+          <caret line="142" column="83" lean-forward="true" selection-start-line="142" selection-start-column="83" selection-end-line="142" selection-end-column="83" />
           <folding>
-            <element signature="e#0#21#0" expanded="true" />
+            <element signature="e#0#22#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/task.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="116">
-          <caret line="80" column="73" lean-forward="false" selection-start-line="80" selection-start-column="73" selection-end-line="80" selection-end-column="73" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/workspace_dars.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="264" column="8" lean-forward="false" selection-start-line="264" selection-start-column="8" selection-end-line="264" selection-end-column="8" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -891,21 +853,47 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/restricted_GMAPP.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="135" column="41" lean-forward="true" selection-start-line="135" selection-start-column="41" selection-end-line="135" selection-end-column="41" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/task.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="337">
+          <caret line="88" column="58" lean-forward="false" selection-start-line="88" selection-start-column="58" selection-end-line="88" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workspace_dars.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="25" column="15" lean-forward="true" selection-start-line="25" selection-start-column="15" selection-end-line="25" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/restricted_main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="191">
-          <caret line="155" column="31" lean-forward="false" selection-start-line="155" selection-start-column="31" selection-end-line="155" selection-end-column="31" />
+        <state relative-caret-position="264">
+          <caret line="36" column="52" lean-forward="true" selection-start-line="36" selection-start-column="52" selection-end-line="36" selection-end-column="52" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/restricted_GMAPP.py">
+    <entry file="file://$PROJECT_DIR$/restricted_post_processing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="17" column="21" lean-forward="true" selection-start-line="17" selection-start-column="21" selection-end-line="17" selection-end-column="21" />
-          <folding />
+        <state relative-caret-position="331">
+          <caret line="118" column="35" lean-forward="true" selection-start-line="118" selection-start-column="35" selection-end-line="118" selection-end-column="35" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

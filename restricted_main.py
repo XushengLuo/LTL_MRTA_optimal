@@ -14,13 +14,12 @@ from vis import plot_workspace
 import numpy
 from post_processing import run
 # from MAPP_heuristic import mapp
-from restricted_GMAPP import mapp, compute_path_cost
+from restricted_GMAPP import mapp, compute_path_cost, return_to_initial
 from vis import vis
 import sys
 from termcolor import colored, cprint
 import networkx as nx
 from sympy.logic.boolalg import to_dnf
-
 
 print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
@@ -283,6 +282,26 @@ def ltl_mrta(formula):
                 print('----------------------------------------------')
 
                 robot_path_suf = mapp(workspace, buchi, acpt_run, robot_waypoint_axis, robot_time_axis, 'simultaneous')
+
+                # return to initial locations
+                if not loop:
+                    horizon = workspace.longest_time({robot: path[-1] for robot, path in robot_path_suf.items()},
+                                                     workspace.type_robot_location)
+
+                    acpt_run = {'subtask': 'return',
+                                'time_element': [horizon, -1],
+                                'essential_robot_edge': {label: [type_robot]
+                                                         for type_robot, label in workspace.type_robot_label.items()},
+                                'essential_clause_edge': last_subtask['essential_clause_edge'],
+                                'neg_edge': last_subtask['neg_edge'],
+                                'essential_robot_vertex': last_subtask['essential_robot_edge'],
+                                'neg_vertex': last_subtask['neg_edge']
+                                }
+                    robot_path_return = return_to_initial(workspace, acpt_run, {robot: path[-1]
+                                                                                for robot, path in robot_path_suf.items()}
+)
+                    for robot, path in robot_path_suf.items():
+                        path += robot_path_return[robot][1:]
 
                 end = datetime.now()
                 print('total time for the prefix + suffix parts: {0}'.format((end - start).total_seconds()))
