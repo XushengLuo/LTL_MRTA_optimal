@@ -8,29 +8,25 @@ import datetime
 import numpy as np
 
 
-def multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause, robot_init,
-                              not_accept):
+def multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause, robot_init):
     # build the time_expanded graph
     time_expanded_graph = nx.DiGraph()
     # s = datetime.datetime.now()
     loc2node, gadget, robot_index, edge_index_dict, index_edge_dict = build_time_expanded_graph(
-        workspace, T, robot_move, time_expanded_graph, not_accept)
+        workspace, T, robot_move, time_expanded_graph)
     # print((datetime.datetime.now() - s).total_seconds())
     # ILP formulation
     m = Model()
     return ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, robot_index, edge_index_dict,
-               index_edge_dict, neg_clause, workspace, T, robot_init, not_accept)
+               index_edge_dict, neg_clause, workspace, T, robot_init)
 
 
-def build_time_expanded_graph(workspace, T, robot_move, time_expanded_graph, not_accept):
+def build_time_expanded_graph(workspace, T, robot_move, time_expanded_graph):
     """
     build the time-expanded graph
     """
-    # decide the horizon according to the existence of self-loop
-    if not_accept:
-        horizon = T + 1
-    else:
-        horizon = T
+    # the horizon
+    horizon = T
     # add nodes from G
     loc2node = dict()
     node_index = 0
@@ -62,7 +58,7 @@ def build_time_expanded_graph(workspace, T, robot_move, time_expanded_graph, not
 
 
 def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, robot_index, edge_index_dict, index_edge_dict,
-        neg_clause, workspace, T, robot_init, not_accept):
+        neg_clause, workspace, T, robot_init):
     """
     build the ILP to solve GMMPP
     """
@@ -100,15 +96,8 @@ def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, rob
         i = robot_index.index(robot)
         m.addConstr(quicksum(x_vars[i, edge_index_dict[(p, t)]] for t in target_node
                              for p in time_expanded_graph.predecessors(t)) == 1)
-    # 3. target location for the next vertex, at time T+1, if not reaching the accept
-    if not_accept:
-        for robot, initial_target in robot_team_initial_target['vertex2'].items():
-            target_node = [loc2node[loc][T+1] for loc in workspace.regions[initial_target[1]]
-                           if loc in loc2node.keys()]
-            i = robot_index.index(robot)
-            m.addConstr(quicksum(x_vars[i, edge_index_dict[(p, t)]] for t in target_node
-                                 for p in time_expanded_graph.predecessors(t)) == 1)
-    # 4. target location for the current vertex, at time 1,....T-1
+
+    # 3. target location for the current vertex, at time 1,....T-1
     for robot, initial_target in robot_team_initial_target['vertex1'].items():
         i = robot_index.index(robot)
         for tt in range(1, T):
@@ -152,15 +141,6 @@ def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, rob
             m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, t)])] for i in index_robot
                                  for t in target_node for p in time_expanded_graph.predecessors(t)) <= neg_lit[2]-1)
 
-    # 3. avoid negative literals in the next vertex, at time T+1 if not reaching the accept
-    if not_accept:
-        for neg_lit in neg_clause['vertex2']:
-            index_robot = [i for i, r in enumerate(robot_index) if r[0] == neg_lit[1]]
-            target_node = [loc2node[loc][T+1] for loc in workspace.regions[neg_lit[0]]
-                           if loc in loc2node.keys()]
-            m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, t)])] for i in index_robot
-                                 for t in target_node for p in time_expanded_graph.predecessors(t)) <= neg_lit[2]-1)
-
     m.update()
     expr = LinExpr([time_expanded_graph.edges[index_edge_dict[index[1]]]['cost'] for index in x_vars.keys()],
                    list(x_vars.values()))
@@ -185,20 +165,15 @@ def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, rob
         print('Optimization ended with status %d' % m.status)
         exit(0)
 
-    paths = extract_paths(x_vars, time_expanded_graph, loc2node, robot_index, edge_index_dict, T, robot_init,
-                          not_accept)
+    paths = extract_paths(x_vars, time_expanded_graph, loc2node, robot_index, edge_index_dict, T, robot_init)
     return paths
 
 
-def extract_paths(x_vars, time_expanded_graph, loc2node, robot_index, edge_index_dict, T, robot_init,
-                  not_accept):
+def extract_paths(x_vars, time_expanded_graph, loc2node, robot_index, edge_index_dict, T, robot_init):
     """
     extract the path from the GMMPP
     """
-    if not_accept:
-        horizon = T + 1
-    else:
-        horizon = T
+    horizon = T
     paths = {robot: [] for robot in robot_index}
     for index, robot in enumerate(robot_index):
         # the initial location
@@ -265,32 +240,17 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
                 clock += 1
                 continue
 
-            not_accept = True
-            # determine the target for robots: (1) edge (2) vertex of the current subtask (3) vertex of the next subtask
+            # determine the target for robots: (1) edge (2) vertex of the current subtask
             robot_team_initial_target = dict()
             robot_team_initial_target['edge'] = {robot: (robot_path[robot][-1], target) for target, robots in
                                                  acpt_run[clock+1]['essential_robot_edge'].items() for robot in robots}
             robot_team_initial_target['vertex1'] = {robot: (robot_path[robot][-1], target) for target, robots in
                                                     acpt_run[clock+1]['essential_robot_vertex'].items() for robot in robots}
-            # not the last subtask:
-            # activiate the vertex of the next subtask
-            if clock + 1 < effective_length:
-                robot_team_initial_target['vertex2'] = {robot: (robot_path[robot][-1], target) for target, robots in
-                                                        acpt_run[clock+2]['essential_robot_vertex'].items()
-                                                        for robot in robots}
-            # the last subtask: none
-            elif clock + 1 == effective_length:
-                robot_team_initial_target['vertex2'] = dict()
-                not_accept = False
 
             # determine the running and terminal constraints
             neg_clause = dict()
             neg_clause['edge'] = acpt_run[clock+1]['neg_edge']
             neg_clause['vertex1'] = acpt_run[clock+1]['neg_vertex']
-            if clock + 1 < effective_length:
-                neg_clause['vertex2'] = acpt_run[clock+2]['neg_vertex']
-            elif clock + 1 == effective_length:
-                neg_clause['vertex2'] = []
 
             # update robot_team_initial_target by considering simultaneity
             next_time = acpt_run[clock+1]['time_element'][0]  # the completion of the current subtask
@@ -315,27 +275,15 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
             robot_init = {robot: path[-1] for robot, path in robot_path.items()}
             for T in range(horizon, horizon + 100, 1):
                 mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
-                                                       robot_init, not_accept)
+                                                       robot_init)
                 if mapp_paths:
-                    # not the last subtask:
-                    # activiate the vertex of the next subtask
-                    if clock + 1 < effective_length:
-                        # update the path: second to the last to one
-                        for robot, path in mapp_paths.items():
-                            robot_path[robot] += path[1:-1]
-                        for robot in robot_path.keys():
-                            if robot not in mapp_paths.keys():
-                                robot_path[robot] += [robot_path[robot][-1]] * T
-                        break
-                    # without self-loop and the last subtask: activate the vertex label
-                    elif clock + 1 == effective_length:
-                        # update the path: second to the last
-                        for robot, path in mapp_paths.items():
-                            robot_path[robot] += path[1:]
-                        for robot in robot_path.keys():
-                            if robot not in mapp_paths.keys():
-                                robot_path[robot] += [robot_path[robot][-1]] * (T+1)
-                        break
+                    # update the path: second to the last
+                    for robot, path in mapp_paths.items():
+                        robot_path[robot] += path[1:]
+                    for robot in robot_path.keys():
+                        if robot not in mapp_paths.keys():
+                            robot_path[robot] += [robot_path[robot][-1]] * T
+                    break
 
             # update key time points for each robot
             if T > horizon:
@@ -363,9 +311,6 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order):
         end = datetime.datetime.now()
         print('GMMPP: ', (end - start).total_seconds())
 
-
-        # vis(workspace, robot_path, {robot: [len(path)] * 2 for robot, path in robot_path.items()}, [])
-        # vis(workspace, robot_path, {robot: [len(path)]*2 for robot, path in robot_path.items()}, task.ap)
         return robot_path
 
 

@@ -1,7 +1,7 @@
 from task import Task
 from z_restricted_buchi_parse import Buchi
 from datetime import datetime
-import restricted_poset
+import z_restricted_poset
 # from workspace import Workspace
 from workspace_dars import Workspace
 import matplotlib.pyplot as plt

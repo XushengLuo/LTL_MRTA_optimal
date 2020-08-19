@@ -27,7 +27,8 @@ def construct_node_set(poset, element2edge, pruned_subgraph, type_robot_label):
         if edge_label != '1':
             node_index = construct_node_set_helper(element, 1, edge_label, element_component_clause_literal_node,
                                                    node_location_type_component_element, node_index)
-        # with self loop
+        # with self loop, nodes for self-loop of the first subtask are created no matter whether the initial locations
+        # satisfy it or not, which will be dealt with in milp in one-clause constraint
         self_loop_label = pruned_subgraph.nodes[element2edge[element][0]]['label']
         if self_loop_label and self_loop_label != '1':
             node_index = construct_node_set_helper(element, 0, self_loop_label, element_component_clause_literal_node,

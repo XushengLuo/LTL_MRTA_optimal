@@ -262,10 +262,12 @@ class Workspace(object):
     #                            (2, 0): (5, 0), (2, 1): (5, 1)}
     #     return type_robot_location
 
-    def update_after_prefix(self):
+    def update_after_prefix(self, loop=False):
         # region and corresponding locations
         self.label_location = {'r{0}'.format(i + 1): j for i, j in enumerate(list(self.type_robot_location.values()))}
-        self.regions.update({label: [region] for label, region in self.label_location.items()})
+        # if robots return to their initial locations
+        if loop:
+            self.regions.update({label: [region] for label, region in self.label_location.items()})
 
         # region where robots reside
         self.type_robot_label = dict(zip(self.type_robot_location.keys(), self.label_location.keys()))
@@ -287,11 +289,12 @@ class Workspace(object):
                 self.p2p[(key_init[r1], key_region[l1])] = min_length
                 self.p2p[(key_region[l1], key_init[r1])] = min_length
 
-        for r1 in range(len(self.label_location)):
-            for r2 in range(r1, len(self.label_location)):
-                length, path = nx.algorithms.single_source_dijkstra(self.graph_workspace,
-                                                                    source=self.label_location[key_init[r1]],
-                                                                    target=self.label_location[key_init[r2]])
-                self.p2p[(key_init[r1], key_init[r2])] = length
-                self.p2p[(key_init[r2], key_init[r1])] = length
-
+        # robots return to their initial locations
+        if loop:
+            for r1 in range(len(self.label_location)):
+                for r2 in range(r1, len(self.label_location)):
+                    length, path = nx.algorithms.single_source_dijkstra(self.graph_workspace,
+                                                                        source=self.label_location[key_init[r1]],
+                                                                        target=self.label_location[key_init[r2]])
+                    self.p2p[(key_init[r1], key_init[r2])] = length
+                    self.p2p[(key_init[r2], key_init[r1])] = length
