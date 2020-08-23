@@ -3,7 +3,9 @@ from restricted_buchi_parse import Buchi
 from datetime import datetime
 import restricted_poset
 # from workspace import Workspace
-from workspace_dars import Workspace
+# from workspace_dars import Workspace
+from workspace_case1 import Workspace
+
 import matplotlib.pyplot as plt
 import restricted_weighted_ts
 import restricted_weighted_ts_suffix
@@ -41,8 +43,8 @@ def ltl_mrta(formula):
     # return to initial locations or not
     loop = True
     one_time = False
-    draw = False
-    show = False
+    draw = True
+    show = True
     best_cost = []
     best_path = dict()
 
@@ -57,6 +59,12 @@ def ltl_mrta(formula):
     init_acpt = buchi.get_init_accept()
 
     for pair, _ in init_acpt:
+
+        workspace.type_robot_location = type_robot_location.copy()
+        workspace.update_after_prefix()
+        buchi.atomic_prop = workspace.atomic_prop
+        buchi.regions = workspace.regions
+
         init_state, accept_state = pair[0], pair[1]
 
         # ======================================= prefix part =================================================#
@@ -83,6 +91,7 @@ def ltl_mrta(formula):
             workspace.type_robot_location = type_robot_location.copy()
             workspace.update_after_prefix()
             buchi.atomic_prop = workspace.atomic_prop
+            buchi.regions = workspace.regions
 
             robot2eccl = restricted_poset.element2robot2eccl(pos, element2edge, pruned_subgraph)
 
@@ -177,6 +186,8 @@ def ltl_mrta(formula):
             workspace.type_robot_location = {robot: path[-1] for robot, path in robot_path_pre.items()}
             workspace.update_after_prefix(loop)
             buchi.atomic_prop = workspace.atomic_prop
+            buchi.regions = workspace.regions
+
             last_subtask = acpt_run[-1]
             # add the removed self-loop of initial state
             if buchi.remove_init_attr:
@@ -185,11 +196,13 @@ def ltl_mrta(formula):
             if buchi.ap_sat_label(pruned_subgraph.nodes[accept_state]['label'],
                                   pruned_subgraph.nodes[accept_state]['neg_label']):
                 end = datetime.now()
-                print('total time for the prefix + suffix parts: {0}'.format((end - start).total_seconds()))
+                print('total time for the prefix parts: {0}'.format((end - start).total_seconds()))
                 cost = compute_path_cost(robot_path_pre)
                 best_cost.append(cost)
                 if min(best_cost) >= cost:
                     best_path = robot_path_pre
+
+                print('the total cost of the found path is: ', min(best_cost), best_cost)
                 print_red_on_cyan(task.formula)
                 print_red_on_cyan([init_state, accept_state, buchi.size,
                                    [pruned_subgraph.number_of_nodes(), pruned_subgraph.number_of_edges()],
@@ -199,6 +212,8 @@ def ltl_mrta(formula):
                         [])
                 if one_time:
                     return
+                else:
+                    continue
 
             # ======================================= suffix part =================================================#
             #                                                                                                      #

@@ -8,7 +8,8 @@ import datetime
 import numpy as np
 
 
-def multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause, robot_init, show):
+def multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause, robot_init, show,
+                              collision_avoidance):
     # build the time_expanded graph
     time_expanded_graph = nx.DiGraph()
     # s = datetime.datetime.now()
@@ -18,7 +19,7 @@ def multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_mov
     # ILP formulation
     m = Model()
     return ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, robot_index, edge_index_dict,
-               index_edge_dict, neg_clause, workspace, T, robot_init, show)
+               index_edge_dict, neg_clause, workspace, T, robot_init, show, collision_avoidance)
 
 
 def build_time_expanded_graph(workspace, T, robot_move, time_expanded_graph):
@@ -58,7 +59,7 @@ def build_time_expanded_graph(workspace, T, robot_move, time_expanded_graph):
 
 
 def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, robot_index, edge_index_dict, index_edge_dict,
-        neg_clause, workspace, T, robot_init, show):
+        neg_clause, workspace, T, robot_init, show, collision_avoidance):
     """
     build the ILP to solve GMMPP
     """
@@ -112,16 +113,16 @@ def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, rob
             for i in range(len(robot_index)):
                 m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, node)])] for p in time_expanded_graph.predecessors(node))
                             == quicksum(x_vars[(i, edge_index_dict[(node, s)])] for s in time_expanded_graph.successors(node)))
+    if collision_avoidance:
+        # (29) head-on collision constraint for a single gadget
+        for edge_pair in gadget:
+            m.addConstr(
+                quicksum(x_vars[i, edge_index_dict[edge]] for i in range(len(robot_index)) for edge in edge_pair) <= 1)
 
-    # (29) head-on collision constraint for a single gadget
-    for edge_pair in gadget:
-        m.addConstr(
-            quicksum(x_vars[i, edge_index_dict[edge]] for i in range(len(robot_index)) for edge in edge_pair) <= 1)
-
-    # (30) the meet collision constraint
-    for node in time_expanded_graph.nodes():
-        m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, node)])] for i in range(len(robot_index))
-                             for p in time_expanded_graph.predecessors(node)) <= 1)
+        # (30) the meet collision constraint
+        for node in time_expanded_graph.nodes():
+            m.addConstr(quicksum(x_vars[(i, edge_index_dict[(p, node)])] for i in range(len(robot_index))
+                                 for p in time_expanded_graph.predecessors(node)) <= 1)
 
     # (32) avoid negative literals
     # 1. negative literals in the edge label at time T
@@ -147,7 +148,7 @@ def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, rob
     m.setObjective(expr, GRB.MINIMIZE)
     m.update()
     m.Params.OutputFlag = 0
-
+    m.Params.MIPGap = 0.3
     m.optimize()
     if m.status == GRB.Status.OPTIMAL:
         # print('Optimal objective: %g' % m.objVal)
@@ -191,40 +192,101 @@ def extract_paths(x_vars, time_expanded_graph, loc2node, robot_index, edge_index
     return paths
 
 
-def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show):
+def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show, collision_avoidance=True):
     """
     Generalized multi-robot path planning
     """
     start = datetime.datetime.now()
     if order == 'sequential':
         robot_path = {type_robot: [location] for type_robot, location in workspace.type_robot_location.items()}
+        robot_progress = {robot: -1 for robot in robot_waypoint.keys()}
+        clock = -1
+        # stop at the last subtask
+        effective_length = len(acpt_run) - 1
 
-        for index, clock in enumerate(acpt_run):
-            # initial and target locations for some robots
-            robot_team_initial_target = {robot: (robot_path[robot][-1], target) for target, robots in clock[-1].items()
-                                         for robot in robots}
-            # starting horizon
-            if index != 0:
-                horizon = clock[2] - acpt_run[index-1][2]
+        while clock < effective_length:
+            # check if the initial robot locations satisfy the first subtask or the current subtask is '1'
+            # if yes, update the local progress of robots that participate and global clock
+            if acpt_run[clock + 1]['subtask'] in buchi.sat_init_edge:  # or acpt_run[clock+1]['essential_clause_edge'] == '1':
+                for robots in acpt_run[clock + 1]['essential_robot_edge'].values():
+                    for robot in robots:
+                        robot_progress[robot] += 1
+                clock += 1
+                continue
+
+            # determine the target for robots: (1) edge (2) vertex of the current subtask
+            robot_team_initial_target = dict()
+            robot_team_initial_target['edge'] = {robot: (robot_path[robot][-1], target) for target, robots in
+                                                 acpt_run[clock + 1]['essential_robot_edge'].items() for robot in
+                                                 robots}
+            robot_team_initial_target['vertex1'] = {robot: (robot_path[robot][-1], target) for target, robots in
+                                                    acpt_run[clock + 1]['essential_robot_vertex'].items() for robot in
+                                                    robots}
+            robot_team_initial_target['other_edges'] = dict()
+            # determine the running and terminal constraints
+            neg_clause = dict()
+            neg_clause['edge'] = acpt_run[clock + 1]['neg_edge']
+            neg_clause['vertex1'] = acpt_run[clock + 1]['neg_vertex']
+
+            # update robot_team_initial_target by considering simultaneity
+            next_time = acpt_run[clock + 1]['time_element'][0]  # the completion of the current subtask
+
+            # robots that need to move according to positive literals
+            partial_or_full = 'f'
+            robot_move = set(robot for robot_initial_target in robot_team_initial_target.values()
+                             for robot in robot_initial_target.keys())
+            if partial_or_full == 'f':
+                robot_move = list(robot_path.keys())
+
+            # ------ find the collision-avoidance paths for involved robots ---------
+            # the completion time of last subtask
+            if clock == -1:
+                past_time = 0
             else:
-                horizon = clock[2]
-            for T in range(horizon, horizon + 100, 1):
-                paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, acpt_run[clock][3],
-                                                  acpt_run[clock][4], show)
-                if paths:
-                    # update
-                    for robot, path in paths.items():
+                past_time = acpt_run[clock]['time_element'][0]
+            # expected horizon according to high-level plan
+            horizon = next_time - past_time
+            robot_init = {robot: path[-1] for robot, path in robot_path.items()}
+            for T in range(horizon, horizon + 100, 5):
+                mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
+                                                       robot_init, show, collision_avoidance)
+                if mapp_paths:
+                    # update the path: second to the last
+                    for robot, path in mapp_paths.items():
                         robot_path[robot] += path[1:]
                     for robot in robot_path.keys():
-                        if robot not in paths.keys():
-                            robot_path[robot] += [robot_path[robot][-1]]*T
+                        if robot not in mapp_paths.keys():
+                            robot_path[robot] += [robot_path[robot][-1]] * T
                     break
+
+            # update key time points for each robot
+            if T > horizon:
+                for robot, time in robot_time.items():
+                    if robot_progress[robot] + 1 < len(robot_time[robot]):
+                        robot_time[robot][robot_progress[robot] + 1:] = [t + T - horizon
+                                                                         for t in
+                                                                         robot_time[robot][robot_progress[robot] + 1:]]
+
+            # update the overall progress
+            past_time += T
+            # update the individual progress
+            for robots in acpt_run[clock + 1]['essential_robot_edge'].values():
+                for robot in robots:
+                    robot_progress[robot] += 1
+            # update the overall plan
+            for subseq_clock in range(clock + 1, len(acpt_run)):
+                acpt_run[subseq_clock]['time_element'][0] = acpt_run[subseq_clock]['time_element'][0] + T - horizon
+            if show:
+                print(acpt_run[clock + 1]['subtask'], acpt_run[clock + 1]['time_element'][0])
+            # plt.show()
+            clock += 1
 
         end = datetime.datetime.now()
         if show:
-            print((end - start).total_seconds())
+            print('GMMPP: ', (end - start).total_seconds())
 
-        # vis(workspace, robot_path, {robot: [len(path)] * 2 for robot, path in robot_path.items()}, [])
+        return robot_path
+
     elif order == 'simultaneous':
         robot_path = {type_robot: [location] for type_robot, location in workspace.type_robot_location.items()}
         robot_progress = {robot: -1 for robot in robot_waypoint.keys()}
@@ -239,6 +301,8 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show):
                 for robots in acpt_run[clock+1]['essential_robot_edge'].values():
                     for robot in robots:
                         robot_progress[robot] += 1
+                if show:
+                    print(acpt_run[clock + 1]['subtask'], acpt_run[clock + 1]['time_element'][0])
                 clock += 1
                 continue
 
@@ -248,7 +312,6 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show):
                                                  acpt_run[clock+1]['essential_robot_edge'].items() for robot in robots}
             robot_team_initial_target['vertex1'] = {robot: (robot_path[robot][-1], target) for target, robots in
                                                     acpt_run[clock+1]['essential_robot_vertex'].items() for robot in robots}
-
             # determine the running and terminal constraints
             neg_clause = dict()
             neg_clause['edge'] = acpt_run[clock+1]['neg_edge']
@@ -258,7 +321,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show):
             next_time = acpt_run[clock+1]['time_element'][0]  # the completion of the current subtask
 
             # robots that need to move according to positive literals
-            partial_or_full = 'f'
+            partial_or_full = sys.argv[1]
             robot_move = set(robot for robot_initial_target in robot_team_initial_target.values()
                              for robot in robot_initial_target.keys())
             remove_edge = update_robot_env(workspace, robot_team_initial_target, robot_move, robot_waypoint, robot_time,
@@ -275,9 +338,10 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show):
             # expected horizon according to high-level plan
             horizon = next_time - past_time
             robot_init = {robot: path[-1] for robot, path in robot_path.items()}
-            for T in range(horizon, horizon + 100, 1):
+            freq = 1
+            for T in range(horizon, horizon + 100, 10):
                 mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
-                                                       robot_init, show)
+                                                       robot_init, show, collision_avoidance)
                 if mapp_paths:
                     # update the path: second to the last
                     for robot, path in mapp_paths.items():
@@ -286,6 +350,10 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show):
                         if robot not in mapp_paths.keys():
                             robot_path[robot] += [robot_path[robot][-1]] * T
                     break
+                else:
+                    freq += 1
+                    if freq > 5:
+                        exit()
 
             # update key time points for each robot
             if T > horizon:
@@ -409,7 +477,7 @@ def compute_path_cost(paths):
     return cost
 
 
-def return_to_initial(workspace, acpt_run, suf_last):
+def return_to_initial(workspace, acpt_run, suf_last, show):
     robot_path = {type_robot: [location] for type_robot, location in suf_last.items()}
 
     # determine the target for robots: (1) edge (2) vertex of the current subtask

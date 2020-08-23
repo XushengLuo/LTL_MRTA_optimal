@@ -231,7 +231,7 @@ class Workspace(object):
         obstacles = []
         obstacles.append(list(itertools.product(range(0, 2), range(5, 6))))  # o1
         # obstacles.append(list(itertools.product(range(2, 2), range(0, 4))))  #
-        obstacles.append(list(itertools.product(range(3, 4), range(7, 10))))  # o2
+        obstacles.append(list(itertfools.product(range(3, 4), range(7, 10))))  # o2
         obstacles.append(list(itertools.product(range(5, 6), range(2, 8))))  # o3
         obstacles.append(list(itertools.product(range(8, 10), range(4, 5))))  # o4
 

@@ -141,17 +141,20 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
         m.Params.OutputFlag = 0
     m.Params.MIPGap = 0.1
     m.update()
-    print('# of variables: {0}'.format(m.NumVars))
-    print('# of constraints: {0}'.format(m.NumConstrs))
+    if show:
+        print('# of variables: {0}'.format(m.NumVars))
+        print('# of constraints: {0}'.format(m.NumConstrs))
 
     m.optimize()
 
     if m.status == GRB.Status.OPTIMAL:
-        print('Optimal objective: %g' % m.objVal)
+        if show:
+            print('Optimal objective: %g' % m.objVal)
     elif m.status == GRB.Status.INF_OR_UNBD:
         print_red_on_cyan('Model is infeasible or unbounded')
     elif m.status == GRB.Status.INFEASIBLE:
-        print('Model is infeasible')
+        if show:
+            print('Model is infeasible')
     elif m.status == GRB.Status.UNBOUNDED:
         print('Model is unbounded')
     else:
@@ -162,7 +165,8 @@ def construct_milp_constraint(ts, type_num, poset, pruned_subgraph, element2edge
     goal = 0
     for index in x_vars.keys():
         goal += ts.edges[tuple(index[:2])]['weight'] * x_vars[index].x
-    print('obj:%g' % goal)
+    if show:
+        print('obj:%g' % goal)
 
     id2robots = dict()
 

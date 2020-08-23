@@ -129,8 +129,8 @@ def construct_edge_set_for_edge_helper(element, element_component2label, element
                         for in_label, in_eccls in element_component2label[(in_ele, comp)].items():
                             if label[1] == in_label[1]:  # same robot type
                                 for in_eccl in in_eccls:
-                                    # from_node >= # to_node
-                                    if len(element_component_clause_literal_node[in_eccl]) >= len(to_node):
+                                    # from_node == # to_node
+                                    if len(element_component_clause_literal_node[in_eccl]) == len(to_node):
                                         # if they have the same indicator, then the number of vertices must be the same
                                         from_node = element_component_clause_literal_node[in_eccl][:len(to_node)]
                                         edge_set += [(from_node[i], to_node[i]) for i in range(len(to_node))]
@@ -148,7 +148,7 @@ def construct_edge_set_for_edge_helper(element, element_component2label, element
                 for in_label, in_eccls in element_component2label[(element, 0)].items():
                     if label[1] == in_label[1]:  # same robot type
                         for in_eccl in in_eccls:
-                            if len(element_component_clause_literal_node[in_eccl]) >= len(to_node):
+                            if len(element_component_clause_literal_node[in_eccl]) == len(to_node):
                                 from_node = element_component_clause_literal_node[in_eccl][:len(to_node)]
                                 edge_set += [(from_node[i], to_node[i]) for i in range(len(to_node))]
                             else:
