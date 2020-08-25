@@ -17,23 +17,24 @@ class Workspace(object):
     """
     define the workspace where robots reside
     """
+
     def __init__(self, n):
         # dimension of the workspace
         # self.length = int(sys.argv[1])
         # self.width = int(sys.argv[1])
         # n = int(sys.argv[2])
-        self.length = 30   # length
-        self.width = 30   # width
+        self.length = 30  # length
+        self.width = 30  # width
         self.n = n
-        self.type_num = {1: self.n}   # single-task robot
+        self.type_num = {1: self.n}  # single-task robot
         self.workspace = (self.length, self.width)
         self.num_of_regions = 10
         self.num_of_obstacles = 10
         self.occupied = []
         self.data = sio.loadmat('/Users/chrislaw/Box Sync/Research/2020_LTL_MRTA_IJRR/'
-                           'cLTL-hierarchical-master/env.mat')
-        self.regions = {'l{0}'.format(i+1): j for i, j in enumerate(self.allocate_region_dars())}
-        self.obstacles = {'o{0}'.format(i+1): j for i, j in enumerate(self.allocate_obstacle_dars())}
+                                'cLTL-hierarchical-master/env.mat')
+        self.regions = {'l{0}'.format(i + 1): j for i, j in enumerate(self.allocate_region_dars())}
+        self.obstacles = {'o{0}'.format(i + 1): j for i, j in enumerate(self.allocate_obstacle_dars())}
         self.type_robot_location = self.initialize()
         # region and corresponding locations
         self.label_location = {'r{0}'.format(i + 1): j for i, j in enumerate(list(self.type_robot_location.values()))}
@@ -50,17 +51,17 @@ class Workspace(object):
     def reachable(self, location, obstacles):
         next_location = []
         # left
-        if location[0]-1 > 0 and (location[0]-1, location[1]) not in obstacles:
-            next_location.append((location, (location[0]-1, location[1])))
+        if location[0] - 1 > 0 and (location[0] - 1, location[1]) not in obstacles:
+            next_location.append((location, (location[0] - 1, location[1])))
         # right
-        if location[0]+1 < self.width and (location[0]+1, location[1]) not in obstacles:
-            next_location.append((location, (location[0]+1, location[1])))
+        if location[0] + 1 < self.width and (location[0] + 1, location[1]) not in obstacles:
+            next_location.append((location, (location[0] + 1, location[1])))
         # up
-        if location[1]+1 < self.length and (location[0], location[1]+1) not in obstacles:
-            next_location.append((location, (location[0], location[1]+1)))
+        if location[1] + 1 < self.length and (location[0], location[1] + 1) not in obstacles:
+            next_location.append((location, (location[0], location[1] + 1)))
         # down
-        if location[1]-1 > 0 and (location[0], location[1]-1) not in obstacles:
-            next_location.append((location, (location[0], location[1]-1)))
+        if location[1] - 1 > 0 and (location[0], location[1] - 1) not in obstacles:
+            next_location.append((location, (location[0], location[1] - 1)))
         return next_location
 
     def build_graph(self):
@@ -106,8 +107,8 @@ class Workspace(object):
                 min_length = np.inf
                 for target in self.regions[key_region[l1]]:
                     length, p = nx.algorithms.single_source_dijkstra(self.graph_workspace,
-                                                                    source=self.label_location[key_init[r1]],
-                                                                    target=target)
+                                                                     source=self.label_location[key_init[r1]],
+                                                                     target=target)
                     if length < min_length and p:
                         min_length = length
                 p2p[(key_init[r1], key_region[l1])] = min_length
@@ -173,7 +174,7 @@ class Workspace(object):
             x_pre = np.asarray([point[0] + 0.5 for point in path])
             y_pre = np.asarray([point[1] + 0.5 for point in path])
             plt.quiver(x_pre[:-1], y_pre[:-1], x_pre[1:] - x_pre[:-1], y_pre[1:] - y_pre[:-1],
-                       color="#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)]),
+                       color="#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)]),
                        scale_units='xy', angles='xy', scale=1, label='prefix path')
 
             plt.savefig('img/path.png', bbox_inches='tight', dpi=600)
@@ -238,7 +239,7 @@ class Workspace(object):
         obs_mat = self.data['Obs']
         obstacles = []
         for i in range(len(obs_mat)):
-            obstacles.append(((obs_mat[i][0]-1)//30, 29-(obs_mat[i][0]-1)%30))
+            obstacles.append(((obs_mat[i][0] - 1) // 30, 29 - (obs_mat[i][0] - 1) % 30))
 
         return [obstacles]
 

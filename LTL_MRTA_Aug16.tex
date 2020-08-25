@@ -285,7 +285,7 @@ A temporal logic task specified by a\ltl formula is valid if atomic propositions
 
 
  \begin{cexmp} [(Valid and invalid formulas)]
-Observe that in Fig.~\ref{fig:workspace}, the satisfied atomic propositions in $\Sigma$ are $\ap{3}{1}{1}$ and $\ap{2}{2}{1}$.   The valid formulas to specify the tasks \hyperref[task:i]{\it (i)} and \hyperref[task:ii]{\it (ii)} are: $\Diamond \Large((\ap{2}{1}{2,1}\wedge \neg \ap{2}{1}{3}) \wedge  \Diamond \ap{2}{1}{3,1}\Large)  \wedge \Diamond \ap{1}{2}{4} \wedge \neg \ap{2}{1}{3} \,\mathcal{U}\, \ap{1}{2}{4}$ and $\square \Diamond (\ap{1}{1}{2,1} \wedge \Diamond \ap{1}{1}{3,1})$, respectively. However, formulas $\Diamond (\ap{1}{1}{2,1} \wedge \Diamond \ap{2}{1}{3,1})$ and $\Diamond (\ap{2}{2}{2,1} \wedge \Diamond \ap{2}{1}{3,1})$ are two invalid formulas due to different number of robots and robot types, respectively.
+Observe that in Fig.~\ref{fig:workspace}, the satisfied atomic propositions in $\Sigma$ are $\ap{3}{1}{1}$ and $\ap{2}{2}{1}$.   The valid formulas to specify the tasks \hyperref[task:i]{\it (i)} and \hyperref[task:ii]{\it (ii)} are: $\phi_1 = \Diamond \Large((\ap{2}{1}{2,1}\wedge \neg \ap{2}{1}{3}) \wedge  \Diamond \ap{2}{1}{3,1}\Large)  \wedge \Diamond \ap{1}{2}{4} \wedge \neg \ap{2}{1}{3} \,\mathcal{U}\, \ap{1}{2}{4}$ and $ \phi_2 = \square \Diamond (\ap{1}{1}{2,1} \wedge \Diamond \ap{1}{1}{3,1})$, respectively. However, formulas $\Diamond (\ap{1}{1}{2,1} \wedge \Diamond \ap{2}{1}{3,1})$ and $\Diamond (\ap{2}{2}{2,1} \wedge \Diamond \ap{2}{1}{3,1})$ are two invalid formulas due to different number of robots and robot types, respectively.
  \end{cexmp}
 \stepcounter{mycounter}
  A $h$-length path $\tau = s^0 \ldots s^h$ that captures the collective behavior of the team is such that $s^{t-1}\to s^{t}, \forall t\in[h]$%% , which is {\it collision-free} since all robots do not collide with obstacles or each other according to Definition~\ref{def:ts}
@@ -1166,12 +1166,13 @@ The most important result is that, with mild assumptions, our method is complete
 
  %% (i) determine the set of sets of atomic propositions $\sigma$'s in $w$ that enable the edge transitions in $\rho$. The set of atomic propositions $\sigma_e$ indexed by $e\in \mathbb{N}$  is such if $v_{e-1} \neq v_e$ in the run $\rho$; (ii) randomly select one clause in the edge label $\gamma(v_{e_1}, v_e)$ is satisfied by $\sigma_e$, then all literals in this clause also appear in $\sigma_e$. We collect these literals to construct the $e$-th set $\sigma^*_e$ in the essential word; (iii)
 \section{Simulation Results}\label{sec:sim}
-We present two case studies, implemented in Python 3.6.3 on a computer with 2.3 GHz Intel Core i5 and 8G RAM, that illustrate the correctness and efficiency of our method. The MILP is solved using Gurobi~\citep{gurobi} with $M_{\text{max}}=10^5$. We generate a  $10\times 10$ grid world with 10 regions and 10 obstacles randomly placed in the world at each trial. The team of robots consists of of 5 types with $N$ robots of each type. The initial locations are randomly generated.
+We present three case studies, implemented in Python 3.6.3 on a computer with 2.3 GHz Intel Core i5 and 8G RAM, that illustrate the correctness and efficiency of our method. The MILP is solved using Gurobi~\citep{gurobi} with $M_{\text{max}}=10^5$. %% We generate a  $10\times 10$ grid world with 10 regions and 10 obstacles randomly placed in the world at each trial. The team of robots consists of of 5 types with $N$ robots of each type. The initial locations are randomly generated.
 
 \subsection{Case study \RNum{1}: (Sub-)optimality for the highly structured NBA}
 In this case study, we examine the quality of the found paths that satisfy those two tasks in the illustrative Example~\ref{exmp:1}, demonstrating the (sub-)optimality of the solutions when the corresponding NBA are highly structured. Here, we relate the high structure of an NBA to the easy detection of the  partial order in the sub-NBA $\auto{subtask}^-$. Observe that in Fig.~\ref{fig:sub-NBA}, a unique paritial order set can capture the sub-NBA $\auto{subtask}^-$ for task~\hyperref[task:i]{\it (i)}. Similar observation can be obtained  on the sub-NBA $\auto{subtask}^-$ in Fig.~\ref{fig:nba_ii_subtask} for task~\hyperref[task:ii]{\it (ii)}. In words, there are clear temporal order between subtasks.
 
-To measure the quality of the solution, we need to get access to the optimal cost, that is, the shortest path length (number of transitions between different cells). Due to the difficulty of the LTL-MRTA problem, it is computationally expensive to get the optimal value. For instance, the product transition system composed of 5 robots has $(8^2)^5=8^{10}$ states. Therefore, we adopt the following task-specific way to get the shortest path length, without considering collision avoidance between robots. Specifially, in the environment shown in Fig.~\ref{fig:frames},  we randomly generate the initial locations of all robots that are at the right of the vertical obstacles, that is, the $x$ coordination is larger than 4. Also, no robots are located inside region $\ell_2$. For task~\hyperref[task:i]{\it (i)}, the sub-NBA $\auto{subtask}^-$ is the same as that in Fig.~\ref{fig:sub-NBA}. To satisfy the task, two robots of type 1 first visit region~$\ell_2$ and then region $\ell_3$, and one robot of type 2 visits region $\ell_4$. We deal with this separately. First, we select two robots of type 1 as follows. For each robot of type 1, we calculate the path consisting of the shortest path from its initial location to a specific cell in region $\ell_2$ plus the shortest path from this cell to the  top-right cell in region $\ell_3$, then this total path is the shortest path the considered robot is going to  take if it is selected to sequentially visit $\ell_2$ and $\ell_3$. Of robots of type 1, we select the best two. We select one robot of type 2 that has the shortest path from its initial location to the  rightmost cell in region $\ell_4$. Next, we take the sum of these three path length to get the optimal cost, since this task can be satisfied by finite-length paths. Note that, we did not consider the temporal relation between robots since they can wait and go by taking the shortest paths. Similarly, for task~\hyperref[task:ii]{\it (ii)}, the prefix part (see Fig.~\ref{fig:nba_ii_subtask}) requires one robot of type 1 to visit region $\ell_2$, \red{and the suffix part ()} requires the same robot to visit region $\ell_3$ then return to region $\ell_2$. We select the robot of type 1 that has the shortest path consisting of the shortest path from its initial location to a specific cell in region $\ell_2$ plus the shortest cycle from this cell to the top-right cell in region $\ell_3$ then back to itself. We set the corresponding path length to  be the optimal cost.
+To measure the quality of the solution, we need to get access to the optimal cost, that is, the shortest path length (number of transitions between different cells). Due to the difficulty of the LTL-MRTA problem, it is computationally expensive to get the optimal value. For instance, the product transition system composed of 5 robots has $(9^2)^5=9^{10}$ states. Therefore, we adopt the following task-specific way to get the shortest path length, without considering collision avoidance between robots. Specifially, in the environment shown in Fig.~\ref{fig:frames},  we randomly generate the initial locations
+of all robots that are at the right of the vertical obstacles, that is, the $x$ coordination is larger than 4. Also, no robots are located inside region $\ell_2$. For task~\hyperref[task:i]{\it (i)}, the sub-NBA $\auto{subtask}^-$ is the same as that in Fig.~\ref{fig:sub-NBA}. To satisfy the task, two robots of type 1 first visit region~$\ell_2$ and then region $\ell_3$, and one robot of type 2 visits region $\ell_4$. We deal with this separately. First, we select two robots of type 1 as follows. For each robot of type 1, we calculate the path consisting of the shortest path from its initial location to a specific cell in region $\ell_2$ plus the shortest path from this cell to the  top-right cell in region $\ell_3$, then this total path is the shortest path the considered robot is going to  take if it is selected to sequentially visit $\ell_2$ and $\ell_3$. Of robots of type 1, we select the best two. We select one robot of type 2 that has the shortest path from its initial location to the  rightmost cell in region $\ell_4$. Next, we take the sum of these three path length to get the optimal cost, since this task can be satisfied by finite-length paths. Note that, we did not consider the temporal relation between robots since they can wait and go by taking the shortest paths. Similarly, for task~\hyperref[task:ii]{\it (ii)}, the prefix part (see Fig.~\ref{fig:nba_ii_subtask}) requires one robot of type 1 to visit region $\ell_2$, \red{and the suffix part ()} requires the same robot to visit region $\ell_3$ then return to region $\ell_2$. We select the robot of type 1 that has the shortest path consisting of the shortest path from its initial location to a specific cell in region $\ell_2$ plus the shortest cycle from this cell to the top-right cell in region $\ell_3$ then back to itself. We set the corresponding path length to  be the optimal cost.
 
 After obtaining the optimal cost, we conduct two implementations of our proposed method. In the first implementation, we use the basic version of GMRPP that does not  consider  the collision avoidance and only assigns explicit target points to those robots that are involved in the considered subtask (see the sequential movement in Section~\ref{sec:gmmpp1}). In the second implementation, we extend to incorporate the collision avoidance (see Appendix~\ref{sec:extension_collision}) and simultaneous movement (see Appendix~\ref{sec:extension_essential}). Both two implementations employ the full-moving scheme (see~\ref{sec:gmmpp1}) , that is, all robots can move in the GMRPP. For task~\hyperref[task:ii]{\it (ii)}, in the suffix part, robots close their trajectories in one step (see Appendix~\ref{app:loop}). Table~\ref{tab:optimal} shows the statistical results, mean and standard deviation, about the cost and the horizon the found paths, average over 50 trials.
 
@@ -1193,12 +1194,57 @@ Without considering the collision avoidance, the path cost returned by our metho
   \end{tabular}}
 \end{table}
 
-\subsection{Case study \RNum{2}: Scalability}
 
-In this case study, we examine the scalability of our proposed method with respect to the size of the environment and the number of robots, and compare the performance with the BMC-based method in~\cite{sahin2019multi}.
+\subsection{Case study \RNum{2}: Quality of the first solutions:} Common for the two specifications in the first case study is that the sub-NBA $\auto{subtask}^-$ for the prefix and suffix, respectively,  can be concisely captured by one poset, which may not be the case for most specifications. In this case study, we consider multiple specifications that can produce many posets, and we examine the quality of the first solutions for each specifications by comparing with the best solutions when finding more solutions. We use the same environment and robot team in the running example~\ref{exmp:1}. The considered specifications are as follows:
+\begin{align*}
+  \phi_3  = & \, \square \Diamond (\ap{2}{1}{2,1} \wedge \Diamond (\ap{2}{1}{3,1} \wedge \Diamond (\ap{2}{1}{4,1} \wedge \Diamond \ap{2}{1}{5,1}  )   )  ), \\
+  \phi_4  = & \, \Diamond (\ap{1}{2}{4,1} \wedge \bigcirc (\ap{1}{2}{4,1} \;\ccalU \, \ap{2}{1}{3})) \wedge \square \Diamond ( \ap{1}{2}{4,1} \wedge \Diamond \ap{1}{2}{3,1}), \\
+  \phi_5  = & \,  \square \Diamond (\ap{1}{1}{3,1} \,\|\, \ap{1}{1}{5,1}) \wedge \square \Diamond \ap{1}{1}{2,1}  \wedge \square \Diamond (\ap{2}{2}{3} \,\|\, \ap{2}{2}{5})  \\
+   & \wedge \square \neg \ap{2}{1}{4} \wedge \square \neg \ap{2}{2}{4}, \\
+  \phi_6  = & \,  \square \Diamond (\ap{1}{2}{4} \wedge \bigcirc (\Diamond \neg \ap{1}{2}{4})) \wedge  \square \Diamond (\ap{1}{1}{5} \wedge \bigcirc (\Diamond \neg \ap{1}{1}{5} )) \\
+  & \wedge  \Diamond  (\ap{3}{1}{3} \wedge \ap{2}{2}{3}), \\
+  \phi_7 = & \, \square \Diamond  (\ap{2}{2}{4,1} \wedge \Diamond (\ap{2}{2}{2,1} \wedge \Diamond \ap{2}{2}{5,1}))  \wedge  \neg \ap{1}{2}{2} \;\ccalU \, \ap{2}{2}{4,1} \\
+  & \wedge \neg \ap{1}{2}{5} \; \ccalU \, \ap{2}{2}{4,1} \wedge (\square \Diamond \ap{2}{1}{5}\, \| \,  \square \Diamond \ap{2}{1}{3}),
+ \end{align*}
+where:
+
+$\phi_3$ requires that the same 2 robots of type 1 meet first at regions $\ell_2$, then  $\ell_3$, next  $\ell_4$ and finally $\ell_5$, repeating this infinitely often;
+
+$\phi_4$ requires that 1 robot of type 2 visits region $\ell_4$ and stays there until 2 robots of type 1 reach region $\ell_3$, and this robot visits regions $\ell_4$ and then $\ell_3$ infinitely many times;
+
+$\phi_5$ requires that 1 robot of type 1 visits regions $\ell_3$ or $\ell_5$ infinitely many times (robot can switch between these two regions) and the same robot visits region $\ell_2$ infinitely many times, 2 robots of type 2 meet at regions $\ell_3$ or $\ell_5$ infinitely many times, and at most 1 robot of any type is present at region $\ell_4$.
+
+$\phi_6$ requires that 1 robot of type 2 visits region $\ell_4$ and then leave, repeating this infinitely many times. Similarly, for infinitely many time, 1 robot of type 1 visits region $\ell_5$ and then leave. Finally, all robots eventually meet at region $\ell_3$ .
+
+$\phi_7$ requires that 2 robots of type 2 meet at region $\ell_4$, then $\ell_2$ and next $\ell_5$, repeating this infinitely many times, but with the restriction that no robots of type 2 reach regions $\ell_2$ and $\ell_5$ before 2 robots of type 2 meet at region $\ell_4$ for the first time. Finally, two robots of type 1 meet at regions $\ell_5$ or $\ell_3$ infinitely often.
 
 
+\begin{table*}[!t]
+  \caption{Results for various specifications}
+  \label{tab:quality}
+  \centering
+  \resizebox{\linewidth}{!}{\begin{tabular}{c|ccccc|cccccc}
+    \toprule
+    \multirow{2}{*}{Task} &  \multirow{2}{*}{$n_{\text{pair}}$} &  \multirow{2}{*}{$|\auto{}|$} & \multirow{2}{*}{$|\autop|$}  & \multirow{2}{*}{$|\auto{subtask}^{-,\text{pre}}|$}   & \multirow{2}{*}{$|\auto{subtask}^{-, \text{suf}}|$} & \multicolumn{2}{c}{1} & \multicolumn{2}{c}{1} & \multicolumn{2}{c}{1}\\
+    \cmidrule(r){7-8}  \cmidrule(r){9-10}  \cmidrule(r){11-12}
+    & & & & & &  $J$ & time(sec) & $J$ & time(sec) & $J$ & time(sec)\\
+    \midrule
+    $\phi_3$ & 8 & (20, 142) & (20, 49) & (3, 2) & (5, 5) & 56.2$\pm$4.2 & 2.0$\pm$0.3 & 56.2$\pm$4.2 & 2.0$\pm$0.3  & 56.2$\pm$4.2 & 2.0$\pm$0.3\\
+    %$\phi_3$ &1 &  (5, 10) & (5, 4) & (5, 4) & --- & 45.3$\pm$3.9 & 2.1$\pm$0.4 & --- & --- & --- & --- \\
+    $\phi_4$ &2 &  (11, 31) & (11, 25) & (10, 19) & (3, 3) & 17.6$\pm$6.2 & 0.7$\pm$0.2 & 17.6$\pm$6.2 & 3.4$\pm$0.8 (4)  & --- & --- \\
+    $\phi_5$ &1  &(4, 9) & (4, 8) & (4, 5) & (4, 5) & 30.6$\pm$9.2 & 1.7$\pm$0.8 & 24.9$\pm$6.1 & 5.0$\pm$1.9 & 24.9$\pm$6.1 & 5.3$\pm$2.0 \\
+    $\phi_6$ &3 & (24, 140) & (24, 104) & (22, 57) & (9, 18) &  49.3$\pm$9.5 & 3.8$\pm$2.5  &  49.3$\pm$9.5 & 4.4$\pm$2.5 &  49.3$\pm$9.5 & 5.6$\pm$2.5 \\
+    $\phi_7$ &4 & (15, 83) & (15, 41) & (8, 13) & (8, 14) & 45.9$\pm$6.8  & 1.5$\pm$0.2 & 45.9$\pm$6.8  & 7.3$\pm$0.6  & 45.9$\pm$6.8  & 17.7$\pm$1.4  \\
+    \bottomrule
+  \end{tabular}}
+\end{table*}
 
+\subsection{Case study \RNum{3}: Scalability}
+
+In this case study, we examine the scalability of our proposed method with respect to the size of the environment and the number of robots. In the first case, we  compare the performance with the BMC-based method in~\cite{sahin2019multi} and in the second case, we examine the effect of full or partial  movement on the performance.
+
+
+\subsubsection{Compatision with the BMC method:}
 Similar to our method,~\cite{sahin2019multi} adopt a hierarchical framework, which enhances the scalability from their previous work~\cite{sahin2017synchronous,sahin2019multirobot}. At the high-level, the BMC-based method abstracts out the given transition system by aggregating states with the same observation, which generates an abstract transition system with much smaller size. Then, inspired by the Bounded Model Checking (BMC) method,  a high-level plan satisfying the specification is generated on the abstract transition system by formulating an ILP programming. After obtaining the high-level plan, a sequence of instances of  multi-robot path planning is used to concretize the high-level plan while taking into account the collision avoidance. Our method differs from the BMC method in~\cite{sahin2019multi} in the following several aspects. First, at the high level, the BMC method only focuses on the feasibility, which terminates as long as the first solution is obtained, whereas in our method, we infer the temporal order between subtasks and optimize the cost by formulating the MILP programming. Second, the high-level plans returned by the BMC method have the same horizon and obey the transition relation defined by the adjacency, whereas the high level plans returned by our method are concise in that they only specify sequences of essential regions and thus, do not necessarily have the same horizon. Third, at the low-level, the path planner are responsible for satisfying the constraints imposed by the negative atomic propositions.
  \begin{figure}[!t]
     \centering
@@ -1209,11 +1255,14 @@ Similar to our method,~\cite{sahin2019multi} adopt a hierarchical framework, whi
 
 To compare the scalability, we borrow the environment used in~\cite{sahin2019multi}, a 30-by30 grid world containing 6 regions $\ell_i, i=1,\ldots,6$; see also Fig.~\ref{fig:scalability}. We consider a team of $N$ homogeneous robots whose initial locations are randomly sampled inside region $\ell_1$. At each trial, $20\%$ of cells are randomly selected as obstacles. The specification is given as follows~\cite{sahin2019multi}.
 \begin{align*}
-  \phi =   \square \Diamond \ap{N}{1}{2} \wedge \square \Diamond \ap{N/2}{1}{3} & \wedge \square \Diamond \ap{N/2}{1}{4} \\
+  \phi_8 = \, &  \square \Diamond \ap{N}{1}{2} \wedge \square \Diamond \ap{N/2}{1}{3} \wedge \square \Diamond \ap{N/2}{1}{4} \\
   & \wedge \neg \ap{1}{1}{4} \,\ccalU\, (\ap{1}{1}{5} \wedge \ap{1}{1}{6}),
 \end{align*}
-Which requires (a) all robots visit region $\ell_2$ infinitely often, (b) at least half of robots visit regions $\ell_3$ and $\ell_4$, respectively, infinitely often, (c) robots should not visit region $\ell_4$ until at least one robot is inside region $\ell_5$ and one robot is inside region $\ell_6$ at the same time. We vary the number $N$ of robots, ranging from 4 to 30, which gives rise to a product transition system that has $(30\times30)^{30}=30^{60}$ states. We record runtimes  and cost of the first feasible solutions, where the cost is the sum of the cost of prefix and suffix parts. %% {Although translating LTL to NBA is worst-case exponential w.r.t. the length of the formula, in practice the translation is quick (0.03  seconds).}
-The size of the automaton is independent of the number of robots. The NBA $\autop$ has one pair of initial and accepting vertices, 5 vertices and 10 edges (excluding self-loops). The sub-NBA $\auto{subtask}^-$ for the prefix and suffix  parts has 5 vertices and 5 edges, and 4 vertices and 5 edges, respectively.  The statistical results, mean and standard deviation, average over 10 trials are shown in Table~\ref{tab:scalability}. The MATLAB code for the BMC method is available in~\url{https://github.com/sahiny/cLTL-hierarchical}.
+Which requires (a) all robots meet at region $\ell_2$ infinitely often, (b) at least half of robots meet at regions $\ell_3$ and $\ell_4$, respectively, infinitely often, (c) robots should not visit region $\ell_4$ until at least one robot is inside region $\ell_5$ and one robot is inside region $\ell_6$ at the same time. We vary the number $N$ of robots, ranging from 4 to 30, which gives rise to a product transition system that has up to $(30\times30)^{30}=30^{60}$ states.
+
+The size of the automaton is independent of the number of robots. The NBA $\autop$ has one pair of initial and accepting vertices, 5 vertices and 10 edges (excluding self-loops). The sub-NBA $\auto{subtask}^-$ for the prefix and suffix  parts has 5 vertices and 5 edges, and 4 vertices and 5 edges, respectively. In the implementation of our method, we use the full movement and simultaneous movement schemes. We record runtimes  and cost of the first feasible solutions, where the cost is the sum of the cost of prefix and suffix parts. %% {Although translating LTL to NBA is worst-case exponential w.r.t. the length of the formula, in practice the translation is quick (0.03  seconds).}
+Both methods consider the collision avoidance. The horizon increases by 10 when no solution exists for the GMRPP.
+The statistical results, mean and standard deviation, average over 10 trials are shown in Table~\ref{tab:scalability}. The MATLAB code for the BMC method is available in~\url{https://github.com/sahiny/cLTL-hierarchical}.
 \begin{table}[!t]
   \caption{Results with respect to the number of robots}\label{tab:scalability}
   \centering
@@ -1224,10 +1273,10 @@ The size of the automaton is independent of the number of robots. The NBA $\auto
       & $J$ & time(sec) & $J$ & time(sec) \\
       \midrule
       4 & 270.6$\pm$4.4 & 62.4$\pm$1.4 & 944.4$\pm$21.2 & 76.5$\pm$13.8\\
-      8 & 513.0$\pm$30.2 & 124.9$\pm$9.2 & 1819$\pm$149.9 & 334.9$\pm$153.9 \\
+      8 & 513.0$\pm$30.2 & 124.9$\pm$9.2 & 1819.0$\pm$149.9 & 334.9$\pm$153.9 \\
       12 & 794.6$\pm$11.1 & 187.4$\pm$9.1 &  2217.0$\pm$163.8 &  704.3$\pm$178.0\\
-      16 & 1080.2$\pm$14.7 & 501.95$\pm$225.4 & 2725.8$\pm$149.2 & 1135.8$\pm$123.7\\
-      30 & 2509.4$\pm$168.9 & 4072.1$\pm$985.4 & $-$ & $-$ \\
+      16 & 1080.2$\pm$14.7 & 502.0$\pm$225.4 & 2725.8$\pm$149.2 & 1135.8$\pm$123.7\\
+      30 & 2509.4$\pm$168.9 & 4072.1$\pm$985.4 & --- &--- \\
       \bottomrule
   \end{tabular}}
 \end{table}
@@ -1236,48 +1285,78 @@ As we can see, our method outperforms the BMC method both in runtimes and qualit
 
 
 
-\subsubsection{Case \RNum{1}} {The cooperative persistence coverage task is}
-
-\small
+\subsubsection{Effect of the full and partial movement schemes:} In the second case, we use the same environmet as shown in Fig.~\ref{fig:scalability}. We continue consider a teams of $N$ homogeneous robots with the following specification:
 \begin{align*}
-  %% & \phi = \square \Diamond \ap{x}{1}{1} \wedge \square \Diamond \ap{x}{2}{2} \wedge \square \Diamond \ap{x}{3}{3}  \wedge \square \Diamond \ap{x}{4}{4} \wedge \square \Diamond \ap{x}{5}{5} \nonumber \\
-  %% & \wedge \Diamond \square\ap{x}{1}{6} \wedge \Diamond \square\ap{x}{2}{7} \wedge \Diamond \square\ap{x}{3}{8} \wedge \Diamond \square\ap{x}{4}{9} \wedge \Diamond \square\ap{x}{5}{10}
-   \phi_2 = \bigwedge\nolimits_{j\in[4]} \square \Diamond( \ap{x}{j}{j} \wedge \ap{x}{j+1}{j} ) ,
+  \phi_9 = &\, \Diamond (\ap{3}{1}{5} \,\| \, \ap{3}{1}{6}) \wedge   \square \Diamond (\ap{N/2}{1}{2,1} \wedge \Diamond \ap{N/2}{1}{4,1}) \\
+  & \wedge  \square \Diamond \ap{N/4}{1}{3} \wedge \square \neg \ap{4}{1}{6},
 \end{align*}
-\normalsize
-where $x = N/3$. We vary $N$ and compare our method to the method for cLTL+ problems in~\cite{sahin2019multirobot} in terms of runtime and cost measured by~\eqref{eq:cost} with $w=0.5$. This task cannot be categorized as a cLTL problem since here robots are heterogeneous. {Although translating LTL to NBA is worst-case exponential w.r.t. the length of the formula, in practice the translation is quick (0.03 and 0.10 seconds for case \RNum{1} and \RNum{2}, respectively). Both NBAs $B$ and $\auto{relax}$ have 5 vertices and 14 edges (excluding self-loops). The size of $B$ is independent of the number of robots. There is one pair of initial and accepting vertices and  $\auto{subtask}^-$ has 5 vertices and 5 edges.} Since the method in~\cite{sahin2019multirobot} depends on the horizon $h$ of the plan, we vary $h$ between 5, 10, 15.\endnote{The SAT solver Z3 is used to solve the Integer Linear Programming since~\cite{sahin2019multirobot} addresses feasibility and all variables are binary.} The results  are shown in Table~\ref{tab:2} and are averaged over 10 trials for each $N$. Our method is two orders of magnitude faster than~\cite{sahin2019multirobot}. This is because it decomposes the problem so that first a sequence of waypoints is decided by solving a MILP and then a shortest path  between waypoints is computed. More importantly, our method outperforms~\cite{sahin2019multirobot} in terms of cost.  The feasibility-oriented formulation in~\cite{sahin2019multirobot} causes robots that are not assigned to any task to move aimlessly, while in our solution, such robots remain idle.
+which requires (a) at least 3 robots eventually meet at either region $\ell_5$ or $\ell_6$, (b) a fleet of the same robots, at least half,  meets at region $\ell_2$ and then $\ell_4$, infinitely often, (c) at least a quarter of robots meet at region $\ell_3$ infinitely often, and (c) always no more than 3 robots can be present at region $\ell_6$ at the same time.
 
-%% \begin{table}[t]
-%%   \centering
-%%   \caption{Comparative results w.r.t. the number of robots}\label{tab:2}
-%%   \begin{tabular}{c|c|c|c|c}
-%%    \toprule
-%%    \multicolumn{2}{c|}{$N$} & 3 & 6 & 9 \\
-%%    \midrule
-%%    \multirow{4}{*}{\vtop{\hbox{\strut runtime}\hbox{\strut \;\,\,(sec)}}} & LTL-MRTA & {\bf 0.1}\bm{$\pm $}{\bf 0.0} & {\bf 0.9}\bm{$\pm$}{\bf 0.5} & {\bf 1.5}\bm{$\pm$}{\bf 0.7}\\
-%%     & $h=5$ & 173.2$\pm$54.3 & 403.9$\pm$207.9 & 511.7$\pm$327.9\\
-%%     & $h=10$ & 71.1$\pm$23.8 & 153.6$\pm$108.8  & 285.9$\pm$271.4\\
-%%     & $h=15$ & 68.3$\pm$6.4 & 159.7$\pm$20.8 & 349.7$\pm$35.5\\
-%%     \midrule
-%%    [<0;26;15M]& LTL-MRTA &  {\bf 19.9}\bm{$\pm$}{\bf 4.4} & {\bf 32.7}\bm{$\pm$} {\bf 3.4} & {\bf 46.9}\bm{$\pm$}{\bf 5.8}\\
-%%     & $h=5$  & 63.0$\pm$8.0 & 118.7$\pm$22.7  & 156.5$\pm$32.7\\
-%%     &$h=10$ & 64.4$\pm$5.7 & 126.6$\pm$14.5 & 189.2$\pm$18.8\\
-%%     & $h=15$ & 92.5$\pm$5.4 & 185.2$\pm$ 6.5 & 268.7$\pm$16.5\\
-%%         \bottomrule
-%%   \end{tabular}
-%% \end{table}
+\begin{table}[!t]
+  \caption{Results with respect to the number of robots}\label{tab:scalability2}
+  \centering
+  \resizebox{\linewidth}{!}{\begin{tabular}{ccccc}
+      \toprule
+      \multirow{2}{*}{$N$} & \multicolumn{2}{c}{Full movement} & \multicolumn{2}{c}{Partial movement} \\
+      \cmidrule(r){2-3}  \cmidrule(r){4-5}
+      & $J$ & time(sec) & $J$ & time(sec) \\
+      \midrule
+      4 & 181.4$\pm$17.7 & 89.5$\pm$5.0 & 180.4$\pm$20.1 & 65.8$\pm$10.1\\
+      8 & 356.6$\pm$16.0 & 198.9$\pm$12.3 & 354.2$\pm$15.2 & 129.3$\pm$4.9 \\
+      12 & 573.5$\pm$63.3 & 350.7$\pm$25.4 &  554.3$\pm$49.4 &  192.5$\pm$10.4\\
+      16 & 774.2$\pm$59.0 & 561.0$\pm$44.4 & 763.0$\pm$50.7 & 278.9$\pm$8.9\\
+      32 & 1516.2$\pm$155.6 & 1804.7 $\pm$512.5 &  1524.5$\pm$6.4 &  909.8$\pm$72.1 \\
+      \bottomrule
+  \end{tabular}}
+\end{table}
 
-\subsubsection{Case \RNum{2}} We consider tasks where some locations are visited sequentially by the same set of robots. For instance, these can be tasks where objects are  picked up by several robots and then delivered to another location.
-Let $N=5$. The LTL formula  considered is
+Before pre-processing in Section~\ref{sec:nba}, there are two pairs of initial and accepting vertices in the corresponding NBA, containing 8 vertices and 27 edges. After pre-processing,  the NBA $\autop$  has 8 vertices and 20 edges. For the first pair of initial and accepting vertices after sorting, the sub-NBA $\auto{subtask}^-$ associated with  the prefix and suffix parts have 7 vertices and 10 edges, and 5 vertices and 7 edges, respectively. We compare the performance of our method when using the full and paritial movement, respectively. The simulation setting is the same that in the first case. The results averaged 10 trials are shown in Table~\ref{tab:scalability2}.
 
-\small
-\begingroup
-\begin{align*}
-  \phi_3 = &  \square \Diamond (\pi^{\ell_1,0}_{3,1} \wedge \pi^{\ell_4, 0}_{4,4}) \wedge \Diamond ( \pi^{\ell_2,1}_{3,3} \wedge  (\pi^{\ell_2,1}_{3,3} \,\mathcal{U} \, \pi^{\ell_2,0}_{1,4})  \wedge \Diamond \pi_{4,3}^{\ell_3,0})   \nonumber \\ & \wedge \Diamond (\aap{2}{2}{\ell_7}{0} \wedge (\aap{3}{5}{\ell_8}{2} \vee \aap{3}{5}{\ell_{10}}{2}) \wedge \bigcirc  \Diamond  \aap{3}{5}{\ell_{9}}{2} ) \wedge \Diamond \square \aap{1}{2}{\ell_{10}}{0}
-\end{align*}
-\endgroup
-\normalsize
-The NBA $B$ has 31 vertices and 182 edges. There is one pair of initial and accepting vertices. The sub-NBA $\auto{subtask}^-$ has 25 vertices and 48 edges. The MILP has 3760 variables and 4477 constraints. The runtime over 10 trials is 4.8$\pm$2.2$s$. {An animation can be found in~\cite{ltlmrta}.} We observe that the paths satisfy the task. The methods in~\cite{schillinger2018decomposition,schillinger2018simultaneous,faruq2018simultaneous} can not address such cooperative tasks and~\cite{sahin2017provably,sahin2017synchronous,sahin2019multi,sahin2019multirobot} can not capture tasks where the same set of robots needs to visit different locations.
+Observe that the partial movement scheme takes less runtimes  compated with the full movement scheme. More importantly, this advantage becomes stronger as the number of robots increases. This is because as more robots are involved, more robots are not necessary to move, treating them as obstacles sometimes can ease the computational burden imposed by increasing robots, for example, the subtask that at least 3 robots meet at region $\ell_5$ or $\ell_6$ only involves 3 robots no matter how large the robot team is. On the other hand, the partial movement scheme results in slightly smaller cost, which indicates that, even though the full movement scheme mobilizes all robots, those robots that do not participate in the specific subtask rarely move becaue of the optimized objective. We note that, as some robots are treated as obstacles,  the partial movement may make the GMRPP infeasible. Thus, it is better to use the partial movement when the environment is relatively spacious considering the size of robots.
+
+%% \subsubsection{Case \RNum{1}} {The cooperative persistence coverage task is}
+
+%% \small
+%% \begin{align*}
+%%   %% & \phi = \square \Diamond \ap{x}{1}{1} \wedge \square \Diamond \ap{x}{2}{2} \wedge \square \Diamond \ap{x}{3}{3}  \wedge \square \Diamond \ap{x}{4}{4} \wedge \square \Diamond \ap{x}{5}{5} \nonumber \\
+%%   %% & \wedge \Diamond \square\ap{x}{1}{6} \wedge \Diamond \square\ap{x}{2}{7} \wedge \Diamond \square\ap{x}{3}{8} \wedge \Diamond \square\ap{x}{4}{9} \wedge \Diamond \square\ap{x}{5}{10}
+%%    \phi_2 = \bigwedge\nolimits_{j\in[4]} \square \Diamond( \ap{x}{j}{j} \wedge \ap{x}{j+1}{j} ) ,
+%% \end{align*}
+
+%% \normalsize
+%% where $x = N/3$. We vary $N$ and compare our method to the method for cLTL+ problems in~\cite{sahin2019multirobot} in terms of runtime and cost measured by~\eqref{eq:cost} with $w=0.5$. This task cannot be categorized as a cLTL problem since here robots are heterogeneous. {Although translating LTL to NBA is worst-case exponential w.r.t. the length of the formula, in practice the translation is quick (0.03 and 0.10 seconds for case \RNum{1} and \RNum{2}, respectively). Both NBAs $B$ and $\auto{relax}$ have 5 vertices and 14 edges (excluding self-loops). The size of $B$ is independent of the number of robots. There is one pair of initial and accepting vertices and  $\auto{subtask}^-$ has 5 vertices and 5 edges.} Since the method in~\cite{sahin2019multirobot} depends on the horizon $h$ of the plan, we vary $h$ between 5, 10, 15.\endnote{The SAT solver Z3 is used to solve the Integer Linear Programming since~\cite{sahin2019multirobot} addresses feasibility and all variables are binary.} The results  are shown in Table~\ref{tab:2} and are averaged over 10 trials for each $N$. Our method is two orders of magnitude faster than~\cite{sahin2019multirobot}. This is because it decomposes the problem so that first a sequence of waypoints is decided by solving a MILP and then a shortest path  between waypoints is computed. More importantly, our method outperforms~\cite{sahin2019multirobot} in terms of cost.  The feasibility-oriented formulation in~\cite{sahin2019multirobot} causes robots that are not assigned to any task to move aimlessly, while in our solution, such robots remain idle.
+
+%% %% \begin{table}[t]
+%% %%   \centering
+%% %%   \caption{Comparative results w.r.t. the number of robots}\label{tab:2}
+%% %%   \begin{tabular}{c|c|c|c|c}
+%% %%    \toprule
+%% %%    \multicolumn{2}{c|}{$N$} & 3 & 6 & 9 \\
+%% %%    \midrule
+%% %%    \multirow{4}{*}{\vtop{\hbox{\strut runtime}\hbox{\strut \;\,\,(sec)}}} & LTL-MRTA & {\bf 0.1}\bm{$\pm $}{\bf 0.0} & {\bf 0.9}\bm{$\pm$}{\bf 0.5} & {\bf 1.5}\bm{$\pm$}{\bf 0.7}\\
+%% %%     & $h=5$ & 173.2$\pm$54.3 & 403.9$\pm$207.9 & 511.7$\pm$327.9\\
+%% %%     & $h=10$ & 71.1$\pm$23.8 & 153.6$\pm$108.8  & 285.9$\pm$271.4\\
+%% %%     & $h=15$ & 68.3$\pm$6.4 & 159.7$\pm$20.8 & 349.7$\pm$35.5\\
+%% %%     \midrule
+%% %%    [<0;26;15M]& LTL-MRTA &  {\bf 19.9}\bm{$\pm$}{\bf 4.4} & {\bf 32.7}\bm{$\pm$} {\bf 3.4} & {\bf 46.9}\bm{$\pm$}{\bf 5.8}\\
+%% %%     & $h=5$  & 63.0$\pm$8.0 & 118.7$\pm$22.7  & 156.5$\pm$32.7\\
+%% %%     &$h=10$ & 64.4$\pm$5.7 & 126.6$\pm$14.5 & 189.2$\pm$18.8\\
+%% %%     & $h=15$ & 92.5$\pm$5.4 & 185.2$\pm$ 6.5 & 268.7$\pm$16.5\\
+%% %%         \bottomrule
+%% %%   \end{tabular}
+%% %% \end{table}
+
+%% \subsubsection{Case \RNum{2}} We consider tasks where some locations are visited sequentially by the same set of robots. For instance, these can be tasks where objects are  picked up by several robots and then delivered to another location.
+%% Let $N=5$. The LTL formula  considered is
+
+%% \small
+%% \begingroup
+%% \begin{align*}
+%%   \phi_3 = &  \square \Diamond (\pi^{\ell_1,0}_{3,1} \wedge \pi^{\ell_4, 0}_{4,4}) \wedge \Diamond ( \pi^{\ell_2,1}_{3,3} \wedge  (\pi^{\ell_2,1}_{3,3} \,\mathcal{U} \, \pi^{\ell_2,0}_{1,4})  \wedge \Diamond \pi_{4,3}^{\ell_3,0})   \nonumber \\ & \wedge \Diamond (\aap{2}{2}{\ell_7}{0} \wedge (\aap{3}{5}{\ell_8}{2} \vee \aap{3}{5}{\ell_{10}}{2}) \wedge \bigcirc  \Diamond  \aap{3}{5}{\ell_{9}}{2} ) \wedge \Diamond \square \aap{1}{2}{\ell_{10}}{0}
+%% \end{align*}
+%% \endgroup
+%% \normalsize
+%% The NBA $B$ has 31 vertices and 182 edges. There is one pair of initial and accepting vertices. The sub-NBA $\auto{subtask}^-$ has 25 vertices and 48 edges. The MILP has 3760 variables and 4477 constraints. The runtime over 10 trials is 4.8$\pm$2.2$s$. {An animation can be found in~\cite{ltlmrta}.} We observe that the paths satisfy the task. The methods in~\cite{schillinger2018decomposition,schillinger2018simultaneous,faruq2018simultaneous} can not address such cooperative tasks and~\cite{sahin2017provably,sahin2017synchronous,sahin2019multi,sahin2019multirobot} can not capture tasks where the same set of robots needs to visit different locations.
 
 
 \appendix

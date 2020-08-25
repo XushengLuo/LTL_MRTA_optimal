@@ -405,10 +405,10 @@ def update_robot_env(workspace, robot_team_initial_target, robot_move, robot_way
                 robot_future_time_min_length_path_target[robot] = [future_time, min_length, path, min_target]
 
     # those robots that are be involved in the negative literals
-    robot_team_initial_target['constraint'] = {(neg_lit[1], robot): (robot_path[(neg_lit[1], robot)][-1], None)
-                                               for clause in neg_clause.values() for neg_lit in clause
-                                               for robot in range(workspace.type_num[neg_lit[1]])}
-    robot_move.update(set(robot_team_initial_target['constraint'].keys()))
+    # robot_team_initial_target['constraint'] = {(neg_lit[1], robot): (robot_path[(neg_lit[1], robot)][-1], None)
+    #                                            for clause in neg_clause.values() for neg_lit in clause
+    #                                            for robot in range(workspace.type_num[neg_lit[1]])}
+    # robot_move.update(set(robot_team_initial_target['constraint'].keys()))
 
     # treat robots that do not move as obstacles
     if partial_or_full == 'p':

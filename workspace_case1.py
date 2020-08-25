@@ -21,8 +21,8 @@ class Workspace(object):
         # self.length = int(sys.argv[1])
         # self.width = int(sys.argv[1])
         # n = int(sys.argv[2])
-        self.length = 8   # length
-        self.width = 8   # width
+        self.length = 9   # length
+        self.width = 9   # width
         # n = 4
         self.type_num = {1: 3, 2: 2}   # single-task robot
         self.workspace = (self.length, self.width)
@@ -180,10 +180,12 @@ class Workspace(object):
         # ijrr
         # # small workspace
         regions = []
-        regions.append(list(itertools.product(range(5, 8), range(0, 2))))  # x0 l1
-        regions.append(list(itertools.product(range(6, 8), range(5, 8))) + [(7,4)])  # b1 l2
-        regions.append(list(itertools.product(range(0, 2), range(0, 4))))  # b2 l3
-        regions.append(list(itertools.product(range(0, 3), range(6, 7))))  # b3 l4
+        regions.append(list(itertools.product(range(6, 9), range(0, 2))))  # l1
+        regions.append(list(itertools.product(range(7, 9), range(5, 8))) + [(8,4)])  # l2
+        regions.append(list(itertools.product(range(0, 3), range(0, 4))))  # l3
+        regions.append(list(itertools.product(range(0, 4), range(6, 7))))  # l4
+        regions.append(list(itertools.product(range(4, 6), range(8, 9))))  # l5
+
         return regions
 
     def allocate_obstacle_dars(self):
@@ -191,23 +193,26 @@ class Workspace(object):
         # small workspace
         obstacles = []
         # obstacles.append(list(itertools.product(range(3, 4), range(2, 6))) + [(4, 2)])  # o1
-        obstacles.append(list(itertools.product(range(3, 4), range(0, 6))))  # o1
+        obstacles.append(list(itertools.product(range(4, 5), range(0, 6))))  # o1
 
         return obstacles
 
     # def initialize(self):
-    #     type_robot_location = {(1, 0): (6, 0), (1, 1): (6, 1), (1, 2): (7, 1),
-    #                            (2, 0): (5, 0), (2, 1): (5, 1)}
+    #     type_robot_location = {(1, 0): (7, 0), (1, 1): (7, 1), (1, 2): (8, 1),
+    #                            (2, 0): (6, 0), (2, 1): (6, 1)}
     #     return type_robot_location
 
     def initialize(self):
         type_robot_location = dict()
-        x0 = list(itertools.product(range(4, 8), range(8)))
+        # x0 = list(itertools.product(range(5, 9), range(9)))
+        x0 = [(i, j) for i in range(9) for j in range(9) for k in range(1, 6)
+              if (i, j) not in self.obstacles['o1'] and (i, j) not in self.regions['l'+str(k)]]
         for robot_type in self.type_num.keys():
             for num in range(self.type_num[robot_type]):
                 while True:
                     candidate = random.sample(x0, 1)[0]
-                    if candidate not in type_robot_location.values() and candidate not in self.regions['l2']:
+                    if candidate not in type_robot_location.values() and candidate not in self.regions['l2']\
+                            and candidate not in self.regions['l5']:
                         type_robot_location[(robot_type, num)] = candidate
                         x0.remove(candidate)
                         break

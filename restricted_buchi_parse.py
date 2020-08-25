@@ -160,7 +160,8 @@ class Buchi(object):
                         else:
                             sat = False
                             break
-
+                if sat:
+                    return sat
         return sat
 
     def get_init_accept(self):

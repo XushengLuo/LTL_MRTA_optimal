@@ -2,7 +2,7 @@ from task import Task
 from restricted_buchi_parse import Buchi
 from datetime import datetime
 import restricted_poset
-from workspace_case3 import Workspace
+from workspace_case1 import Workspace
 
 import matplotlib.pyplot as plt
 import restricted_weighted_ts
@@ -25,9 +25,9 @@ import numpy as np
 print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
 
-def ltl_mrta(formula):
+def ltl_mrta():
 
-    workspace = Workspace(formula)
+    workspace = Workspace()
     with open('data/workspace', 'wb') as filehandle:
         pickle.dump(workspace, filehandle)
 
@@ -43,17 +43,18 @@ def ltl_mrta(formula):
     loop = True
     one_time = False
     draw = False
-    show = True
+    show = False
+    show_success = False
     best_cost = np.inf
     cost = []
     time_record = []
     horizon_record = []
-    number_of_paths = 0
+    number_of_paths = 10
     best_path = dict()
 
     start = datetime.now()
     # --------------- constructing the Buchi automaton ----------------
-    task = Task(formula)
+    task = Task()
     buchi = Buchi(task, workspace)
 
     buchi.construct_buchi_graph()
@@ -61,7 +62,6 @@ def ltl_mrta(formula):
         print('partial time to build buchi: {0}'.format((datetime.now() - start).total_seconds()))
 
     init_acpt = buchi.get_init_accept()
-    print(len(init_acpt))
 
     for pair, _ in init_acpt:
 
@@ -211,10 +211,11 @@ def ltl_mrta(formula):
                     best_path = robot_path_pre
                     best_cost = cost_pre
                 print('the total cost of the found path is: ', best_cost, cost, time_record, horizon_record)
-                if show:
+                if show_success:
                     print_red_on_cyan(task.formula)
                     print_red_on_cyan([init_state, accept_state, buchi.size,
-                                   [pruned_subgraph.number_of_nodes(), pruned_subgraph.number_of_edges()],
+                                       [buchi.buchi_graph.number_of_nodes(), buchi.buchi_graph.number_of_edges()],
+                                       [pruned_subgraph.number_of_nodes(), pruned_subgraph.number_of_edges()],
                                   'A path is found for the case where the accepting state has a self-loop'])
                 if draw:
                     vis(workspace, robot_path_pre, {robot: [len(path)] * 2 for robot, path in robot_path_pre.items()},
@@ -384,9 +385,10 @@ def ltl_mrta(formula):
                     best_path = robot_path
                     best_cost = cost_pre + cos_suf
                 print('the total cost of the found path is: ', best_cost, cost, time_record, horizon_record)
-                if show:
+                if show_success:
                     print_red_on_cyan(task.formula)
                     print_red_on_cyan([init_state, accept_state, buchi.size,
+                                       [buchi.buchi_graph.number_of_nodes(), buchi.buchi_graph.number_of_edges()],
                                    ([pruned_subgraph.number_of_nodes(), pruned_subgraph.number_of_edges()],
                                     [pruned_subgraph_suf.number_of_nodes(), pruned_subgraph_suf.number_of_edges()]),
                                    'A path is found for the case where the accepting state does not have a self-loop'])
@@ -400,4 +402,4 @@ def ltl_mrta(formula):
 
 
 if __name__ == '__main__':
-    ltl_mrta(int(sys.argv[2]))
+    ltl_mrta()

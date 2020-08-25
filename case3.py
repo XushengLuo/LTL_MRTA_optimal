@@ -41,7 +41,7 @@ def ltl_mrta(formula):
     type_robot_location = workspace.type_robot_location.copy()
     # return to initial locations or not
     loop = True
-    one_time = False
+    one_time = True
     draw = False
     show = True
     best_cost = np.inf
@@ -61,7 +61,6 @@ def ltl_mrta(formula):
         print('partial time to build buchi: {0}'.format((datetime.now() - start).total_seconds()))
 
     init_acpt = buchi.get_init_accept()
-    print(len(init_acpt))
 
     for pair, _ in init_acpt:
 
@@ -87,6 +86,15 @@ def ltl_mrta(formula):
         element_component2label = buchi.element2label2eccl(element2edge, pruned_subgraph)
 
         hasse_graphs = buchi.map_path_to_element_sequence(edge2element, paths)
+
+        if sys.argv[1] == 'f':
+            with open('data/poset', 'wb') as filehandle:
+                pickle.dump(hasse_graphs, filehandle)
+        if sys.argv[1] == 'p':
+            with open('data/poset', 'rb') as filehandle:
+                hasse_graphs = pickle.load(filehandle)
+        print(hasse_graphs)
+
         # loop over all posets
         for _, poset_relation, pos, hasse_diagram in hasse_graphs:
             if show:
@@ -107,7 +115,6 @@ def ltl_mrta(formula):
                     print(pruned_subgraph.edges[element2edge[order[0]]]['formula'], ' -> ',
                           pruned_subgraph.edges[element2edge[order[1]]]['formula'])
                 print('----------------------------------------------')
-
             incomparable_element, larger_element, smaller_element, strict_larger_element = \
                 restricted_poset.incomparable_larger(pos, poset_relation, hasse_diagram)
 
@@ -241,7 +248,7 @@ def ltl_mrta(formula):
             if not pruned_subgraph_suf:
                 continue
 
-            # no paths due to the implication does no t hold
+            # no paths due to the implication does not hold
             if not paths_suf:
                 continue
 
@@ -251,6 +258,13 @@ def ltl_mrta(formula):
 
             hasse_graphs_suf = buchi.map_path_to_element_sequence(edge2element_suf, paths_suf)
 
+            if sys.argv[1] == 'f':
+                with open('data/poset_suf', 'wb') as filehandle:
+                    pickle.dump(hasse_graphs_suf, filehandle)
+            if sys.argv[1] == 'p':
+                with open('data/poset_suf', 'rb') as filehandle:
+                    hasse_graphs_suf = pickle.load(filehandle)
+            print(hasse_graphs_suf)
             for _, poset_relation_suf, pos_suf, hasse_diagram_suf in hasse_graphs_suf:
                 if show:
                     print_red_on_cyan('================ suffix part ================')
@@ -401,3 +415,4 @@ def ltl_mrta(formula):
 
 if __name__ == '__main__':
     ltl_mrta(int(sys.argv[2]))
+    # ltl_mrta(4)

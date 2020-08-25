@@ -146,8 +146,13 @@ def ILP(m, time_expanded_graph, robot_team_initial_target, loc2node, gadget, rob
     expr = LinExpr([time_expanded_graph.edges[index_edge_dict[index[1]]]['cost'] for index in x_vars.keys()],
                    list(x_vars.values()))
     m.setObjective(expr, GRB.MINIMIZE)
+
+    # print('# of variables: {0}'.format(m.NumVars))
+    # print('# of constraints: {0}'.format(m.NumConstrs))
+    # print(len(robot_index))
     m.update()
-    m.Params.OutputFlag = 0
+    if not show:
+        m.Params.OutputFlag = 0
     m.Params.MIPGap = 0.3
     m.optimize()
     if m.status == GRB.Status.OPTIMAL:
@@ -247,7 +252,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show, co
             # expected horizon according to high-level plan
             horizon = next_time - past_time
             robot_init = {robot: path[-1] for robot, path in robot_path.items()}
-            for T in range(horizon, horizon + 100, 5):
+            for T in range(horizon, horizon + 100, 10):
                 mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
                                                        robot_init, show, collision_avoidance)
                 if mapp_paths:
@@ -339,7 +344,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show, co
             horizon = next_time - past_time
             robot_init = {robot: path[-1] for robot, path in robot_path.items()}
             freq = 1
-            for T in range(horizon, horizon + 100, 10):
+            for T in range(horizon, horizon + 100, 1):
                 mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
                                                        robot_init, show, collision_avoidance)
                 if mapp_paths:
@@ -352,7 +357,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show, co
                     break
                 else:
                     freq += 1
-                    if freq > 5:
+                    if freq > 10:
                         exit()
 
             # update key time points for each robot
@@ -417,10 +422,11 @@ def update_robot_env(workspace, robot_team_initial_target, robot_move, robot_way
                 robot_future_time_min_length_path_target[robot] = [future_time, min_length, path, min_target]
 
     # those robots that are be involved in the negative literals
-    robot_team_initial_target['constraint'] = {(neg_lit[1], robot): (robot_path[(neg_lit[1], robot)][-1], None)
-                                               for clause in neg_clause.values() for neg_lit in clause
-                                               for robot in range(workspace.type_num[neg_lit[1]])}
-    robot_move.update(set(robot_team_initial_target['constraint'].keys()))
+
+    # robot_team_initial_target['constraint'] = {(neg_lit[1], robot): (robot_path[(neg_lit[1], robot)][-1], None)
+    #                                                for clause in neg_clause.values() for neg_lit in clause
+    #                                                for robot in range(workspace.type_num[neg_lit[1]])}
+    # robot_move.update(set(robot_team_initial_target['constraint'].keys()))
 
     # treat robots that do not move as obstacles
     if partial_or_full == 'p':
