@@ -46,7 +46,8 @@ class Workspace(object):
         self.graph_workspace = nx.Graph()
         self.build_graph()
 
-        self.p2p = self.point_to_point_path()  # label2label path
+        # self.p2p = self.point_to_point_path()  # label2label path
+        self.p2p = self.point_to_point_path_abstract()
 
     def reachable(self, location, obstacles):
         next_location = []
@@ -82,38 +83,59 @@ class Workspace(object):
                         atomic_prop[(region, type_robot[0])] += 1
         return atomic_prop
 
-    def point_to_point_path(self):
-        key_region = list(self.regions.keys())
-        key_init = list(self.label_location.keys())
+    def point_to_point_path_abstract(self):
+        # aggregate the region as one node
+        abs_graph = self.graph_workspace.copy()
+        add_edge = dict()
+        for region, cells in self.regions.items():
+            adj_cells = []
+            edge = []
+            for cell in cells:
+                adj_cells += [adj_cell[1] for adj_cell in self.graph_workspace.edges(cell) if adj_cell[1] not in cells]
+            for adj_cell in adj_cells:
+                add = False
+                for r, c in self.regions.items():
+                    if adj_cell in c:
+                        edge.append((region, r))
+                        add = True
+                        break
+                if not add:
+                    edge.append((adj_cell, region))
+            add_edge[region] = edge
 
-        # p2p = dict()
-        # for l1 in range(len(self.regions)):
-        #     for l2 in range(l1, len(self.regions)):
-        #         min_length = np.inf
-        #         for source in self.regions[key_region[l1]]:
-        #             for target in self.regions[key_region[l2]]:
-        #                 length, _ = nx.algorithms.single_source_dijkstra(self.graph_workspace, source=source,
-        #                                                                  target=target)
-        #                 if length < min_length:
-        #                     min_length = length
-        #         p2p[(key_region[l1], key_region[l2])] = min_length
-        #         p2p[(key_region[l2], key_region[l1])] = min_length
-        # with open('data/p2p_large_workspace', 'wb') as filehandle:
+        # calculate the shortest length
+        p2p = dict()
+        for l1 in self.regions.keys():
+            for l2 in self.regions.keys():
+                if l1 == l2:
+                    p2p[(l1, l2)] = 0
+                    p2p[(l2, l1)] = 0
+                elif (l1, l2) not in p2p.keys():
+                    abs_graph.add_edges_from(add_edge[l1])
+                    abs_graph.add_edges_from(add_edge[l2])
+                    length, path = nx.algorithms.single_source_dijkstra(abs_graph, source=l1, target=l2)
+                    p2p[(l1, l2)] = length
+                    p2p[(l2, l1)] = length
+                    abs_graph.remove_edges_from(add_edge[l1])
+                    abs_graph.remove_edges_from(add_edge[l2])
+                # with open('data/p2p_large_workspace', 'wb') as filehandle:
         #     pickle.dump(p2p, filehandle)
-        with open('data/p2p_large_workspace', 'rb') as filehandle:
-            p2p = pickle.load(filehandle)
-        for r1 in range(len(self.label_location)):
-            for l1 in range(len(self.regions)):
-                min_length = np.inf
-                for target in self.regions[key_region[l1]]:
-                    length, p = nx.algorithms.single_source_dijkstra(self.graph_workspace,
-                                                                     source=self.label_location[key_init[r1]],
-                                                                     target=target)
-                    if length < min_length and p:
-                        min_length = length
-                p2p[(key_init[r1], key_region[l1])] = min_length
-                p2p[(key_region[l1], key_init[r1])] = min_length
+        # with open('data/p2p_large_workspace', 'rb') as filehandle:
+        #     p2p = pickle.load(filehandle)
 
+        for r1, loc in self.label_location.items():
+            for l1 in self.regions.keys():
+                if loc in self.regions[l1]:
+                    p2p[(r1, l1)] = 0
+                    p2p[(l1, r1)] = 0
+                else:
+                    abs_graph.add_edges_from(add_edge[l1])
+                    length, path = nx.algorithms.single_source_dijkstra(abs_graph, source=loc, target=l1)
+                    p2p[(r1, l1)] = length
+                    p2p[(l1, r1)] = length
+                    abs_graph.remove_edges_from(add_edge[l1])
+
+        key_init = list(self.label_location.keys())
         for r1 in range(len(self.label_location)):
             for r2 in range(r1, len(self.label_location)):
                 length, path = nx.algorithms.single_source_dijkstra(self.graph_workspace,
@@ -123,6 +145,48 @@ class Workspace(object):
                 p2p[(key_init[r2], key_init[r1])] = length
 
         return p2p
+
+    # def point_to_point_path(self):
+    #     key_region = list(self.regions.keys())
+    #     key_init = list(self.label_location.keys())
+    #
+    #     # p2p = dict()
+    #     # for l1 in range(len(self.regions)):
+    #     #     for l2 in range(l1, len(self.regions)):
+    #     #         min_length = np.inf
+    #     #         for source in self.regions[key_region[l1]]:
+    #     #             for target in self.regions[key_region[l2]]:
+    #     #                 length, _ = nx.algorithms.single_source_dijkstra(self.graph_workspace, source=source,
+    #     #                                                                  target=target)
+    #     #                 if length < min_length:
+    #     #                     min_length = length
+    #     #         p2p[(key_region[l1], key_region[l2])] = min_length
+    #     #         p2p[(key_region[l2], key_region[l1])] = min_length
+    #     # with open('data/p2p_large_workspace', 'wb') as filehandle:
+    #     #     pickle.dump(p2p, filehandle)
+    #     with open('data/p2p_large_workspace', 'rb') as filehandle:
+    #         p2p = pickle.load(filehandle)
+    #     for r1 in range(len(self.label_location)):
+    #         for l1 in range(len(self.regions)):
+    #             min_length = np.inf
+    #             for target in self.regions[key_region[l1]]:
+    #                 length, p = nx.algorithms.single_source_dijkstra(self.graph_workspace,
+    #                                                                  source=self.label_location[key_init[r1]],
+    #                                                                  target=target)
+    #                 if length < min_length and p:
+    #                     min_length = length
+    #             p2p[(key_init[r1], key_region[l1])] = min_length
+    #             p2p[(key_region[l1], key_init[r1])] = min_length
+    #
+    #     for r1 in range(len(self.label_location)):
+    #         for r2 in range(r1, len(self.label_location)):
+    #             length, path = nx.algorithms.single_source_dijkstra(self.graph_workspace,
+    #                                                                 source=self.label_location[key_init[r1]],
+    #                                                                 target=self.label_location[key_init[r2]])
+    #             p2p[(key_init[r1], key_init[r2])] = length
+    #             p2p[(key_init[r2], key_init[r1])] = length
+    #
+    #     return p2p
 
     def plot_workspace(self):
         ax = plt.figure(1).gca()

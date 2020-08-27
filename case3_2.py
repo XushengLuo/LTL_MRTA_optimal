@@ -27,6 +27,8 @@ print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
 def ltl_mrta(formula):
 
+    start = datetime.now()
+
     workspace = Workspace(formula)
     with open('data/workspace', 'wb') as filehandle:
         pickle.dump(workspace, filehandle)
@@ -51,7 +53,6 @@ def ltl_mrta(formula):
     number_of_paths = 0
     best_path = dict()
 
-    start = datetime.now()
     # --------------- constructing the Buchi automaton ----------------
     task = Task(formula)
     buchi = Buchi(task, workspace)

@@ -326,7 +326,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show, co
             next_time = acpt_run[clock+1]['time_element'][0]  # the completion of the current subtask
 
             # robots that need to move according to positive literals
-            partial_or_full = sys.argv[1]
+            partial_or_full = 'f'  # sys.argv[1]
             robot_move = set(robot for robot_initial_target in robot_team_initial_target.values()
                              for robot in robot_initial_target.keys())
             remove_edge = update_robot_env(workspace, robot_team_initial_target, robot_move, robot_waypoint, robot_time,
@@ -344,7 +344,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show, co
             horizon = next_time - past_time
             robot_init = {robot: path[-1] for robot, path in robot_path.items()}
             freq = 1
-            for T in range(horizon, horizon + 100, 1):
+            for T in range(horizon, horizon + 100, 10):
                 mapp_paths = multi_agent_path_planning(workspace, T, robot_team_initial_target, robot_move, neg_clause,
                                                        robot_init, show, collision_avoidance)
                 if mapp_paths:

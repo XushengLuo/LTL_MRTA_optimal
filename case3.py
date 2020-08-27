@@ -27,6 +27,8 @@ print_red_on_cyan = lambda x: cprint(x, 'blue', 'on_red')
 
 def ltl_mrta(formula):
 
+    start = datetime.now()
+
     workspace = Workspace(formula)
     with open('data/workspace', 'wb') as filehandle:
         pickle.dump(workspace, filehandle)
@@ -51,7 +53,6 @@ def ltl_mrta(formula):
     number_of_paths = 0
     best_path = dict()
 
-    start = datetime.now()
     # --------------- constructing the Buchi automaton ----------------
     task = Task(formula)
     buchi = Buchi(task, workspace)
@@ -86,14 +87,6 @@ def ltl_mrta(formula):
         element_component2label = buchi.element2label2eccl(element2edge, pruned_subgraph)
 
         hasse_graphs = buchi.map_path_to_element_sequence(edge2element, paths)
-
-        if sys.argv[1] == 'f':
-            with open('data/poset', 'wb') as filehandle:
-                pickle.dump(hasse_graphs, filehandle)
-        if sys.argv[1] == 'p':
-            with open('data/poset', 'rb') as filehandle:
-                hasse_graphs = pickle.load(filehandle)
-        print(hasse_graphs)
 
         # loop over all posets
         for _, poset_relation, pos, hasse_diagram in hasse_graphs:
@@ -258,13 +251,6 @@ def ltl_mrta(formula):
 
             hasse_graphs_suf = buchi.map_path_to_element_sequence(edge2element_suf, paths_suf)
 
-            if sys.argv[1] == 'f':
-                with open('data/poset_suf', 'wb') as filehandle:
-                    pickle.dump(hasse_graphs_suf, filehandle)
-            if sys.argv[1] == 'p':
-                with open('data/poset_suf', 'rb') as filehandle:
-                    hasse_graphs_suf = pickle.load(filehandle)
-            print(hasse_graphs_suf)
             for _, poset_relation_suf, pos_suf, hasse_diagram_suf in hasse_graphs_suf:
                 if show:
                     print_red_on_cyan('================ suffix part ================')
@@ -414,5 +400,5 @@ def ltl_mrta(formula):
 
 
 if __name__ == '__main__':
-    ltl_mrta(int(sys.argv[2]))
-    # ltl_mrta(4)
+    # ltl_mrta(int(sys.argv[2]))
+    ltl_mrta(4)

@@ -133,5 +133,5 @@ class Task(object):
         # ----------------- case 3 ------------------
         # self.formula = '[]<> l2_1_{0}_0 && []<> l3_1_{1}_0 && [] <> l4_1_{2}_0 && (!l4_1_1 U (l5_1_1_0 && l6_1_1_0))'. \
         #     format(formula, formula // 2, formula // 2)
-        # self.formula = '[]<> l3_1_{0}_0 && []<> (l2_1_{1}_1 && <> l4_1_{2}_1) &&  <> (l5_1_3_0 || l6_1_3_0) &&' \
-        #                '[] ! l6_1_4'.format(formula//4, formula//2, formula//2)
+        self.formula = '[]<> l3_1_{0}_0 && []<> (l2_1_{1}_1 && <> l4_1_{2}_1) &&  <> (l5_1_3_0 || l6_1_3_0) &&' \
+                       '[] ! l6_1_4'.format(formula//4, formula//2, formula//2)
