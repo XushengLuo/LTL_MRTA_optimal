@@ -181,7 +181,7 @@ class Workspace(object):
         # # small workspace
         regions = []
         regions.append(list(itertools.product(range(6, 9), range(0, 2))))  # l1
-        regions.append(list(itertools.product(range(7, 9), range(5, 8))) + [(8,4)])  # l2
+        regions.append(list(itertools.product(range(7, 9), range(5, 8))) + [(8, 4)])  # l2
         regions.append(list(itertools.product(range(0, 3), range(0, 4))))  # l3
         regions.append(list(itertools.product(range(0, 4), range(6, 7))))  # l4
         regions.append(list(itertools.product(range(4, 6), range(8, 9))))  # l5
@@ -205,14 +205,16 @@ class Workspace(object):
     def initialize(self):
         type_robot_location = dict()
         # x0 = list(itertools.product(range(5, 9), range(9)))
-        x0 = [(i, j) for i in range(9) for j in range(9) for k in range(1, 6)
-              if (i, j) not in self.obstacles['o1'] and (i, j) not in self.regions['l'+str(k)]]
+        region = []
+        for k in range(1, 6):
+            region += self.regions['l'+str(k)]
+        x0 = [(i, j) for i in range(9) for j in range(9)
+              if (i, j) not in self.obstacles['o1'] and (i, j) and (i, j) not in region]
         for robot_type in self.type_num.keys():
             for num in range(self.type_num[robot_type]):
                 while True:
                     candidate = random.sample(x0, 1)[0]
-                    if candidate not in type_robot_location.values() and candidate not in self.regions['l2']\
-                            and candidate not in self.regions['l5']:
+                    if candidate not in type_robot_location.values():
                         type_robot_location[(robot_type, num)] = candidate
                         x0.remove(candidate)
                         break

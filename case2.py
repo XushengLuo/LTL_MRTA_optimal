@@ -43,8 +43,8 @@ def ltl_mrta():
     loop = True
     one_time = False
     draw = False
-    show = False
-    show_success = False
+    show = True
+    show_success = True
     best_cost = np.inf
     cost = []
     time_record = []

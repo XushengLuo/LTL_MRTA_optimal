@@ -326,7 +326,7 @@ def mapp(workspace, buchi, acpt_run, robot_waypoint, robot_time, order, show, co
             next_time = acpt_run[clock+1]['time_element'][0]  # the completion of the current subtask
 
             # robots that need to move according to positive literals
-            partial_or_full = 'f'  # sys.argv[1]
+            partial_or_full = sys.argv[1]
             robot_move = set(robot for robot_initial_target in robot_team_initial_target.values()
                              for robot in robot_initial_target.keys())
             remove_edge = update_robot_env(workspace, robot_team_initial_target, robot_move, robot_waypoint, robot_time,
@@ -423,10 +423,10 @@ def update_robot_env(workspace, robot_team_initial_target, robot_move, robot_way
 
     # those robots that are be involved in the negative literals
 
-    # robot_team_initial_target['constraint'] = {(neg_lit[1], robot): (robot_path[(neg_lit[1], robot)][-1], None)
-    #                                                for clause in neg_clause.values() for neg_lit in clause
-    #                                                for robot in range(workspace.type_num[neg_lit[1]])}
-    # robot_move.update(set(robot_team_initial_target['constraint'].keys()))
+    robot_team_initial_target['constraint'] = {(neg_lit[1], robot): (robot_path[(neg_lit[1], robot)][-1], None)
+                                                   for clause in neg_clause.values() for neg_lit in clause
+                                                   for robot in range(workspace.type_num[neg_lit[1]])}
+    robot_move.update(set(robot_team_initial_target['constraint'].keys()))
 
     # treat robots that do not move as obstacles
     if partial_or_full == 'p':
